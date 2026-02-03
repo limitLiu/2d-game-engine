@@ -1,0 +1,8 @@
+/target
+.DS_Store
+/.docker
+/build
+/raspberrypi
+/.cache
+/cmake-build-debug
+/.idea
