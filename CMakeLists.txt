@@ -79,11 +79,13 @@ endif ()
 
 add_executable(${PROJECT_NAME}
         src/main.cc
+        src/Core/Game.cc
 )
+
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
 target_include_directories(
         ${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR}
-        "${PROJECT_SOURCE_DIR}/include"
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog glm::glm sol2::sol2 ${LUA_LIBRARIES} SDL2::SDL2 imgui_lib)
 
