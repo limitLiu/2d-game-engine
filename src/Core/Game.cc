@@ -77,15 +77,19 @@ void Game::run() {
 
 void Game::setup() {
   position = glm::vec2(10.0, 20.0);
-  velocity = glm::vec2(1.0, 0.0);
+  velocity = glm::vec2(20.0, 0.0);
 }
 
 void Game::update() {
-  while (!SDL_TICKS_PASSED(SDL_GetTicks(), _millisecsPreviousFrame + MILLISECS_PER_FRAME))
-    ;
+  auto wait = MILLISECS_PER_FRAME - SDL_GetTicks() + _millisecsPreviousFrame;
+  if (wait > 0 && wait <= MILLISECS_PER_FRAME) {
+    SDL_Delay(wait);
+  }
+  f64 deltaTime = (SDL_GetTicks() - _millisecsPreviousFrame) / 1000.0;
+
   _millisecsPreviousFrame = SDL_GetTicks();
-  position.x += velocity.x;
-  position.y += velocity.y;
+  position.x += velocity.x * deltaTime;
+  position.y += velocity.y * deltaTime;
 }
 
 void Game::destroy() { SDL_Quit(); }
