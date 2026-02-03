@@ -18,6 +18,7 @@ if (APPLE AND EXISTS "/opt/homebrew/include/lua")
 endif ()
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
 
 include(FetchContent)
 
@@ -87,7 +88,15 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 target_include_directories(
         ${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR}
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog glm::glm sol2::sol2 ${LUA_LIBRARIES} SDL2::SDL2 imgui_lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        spdlog::spdlog
+        glm::glm
+        sol2::sol2
+        ${LUA_LIBRARIES}
+        SDL2::SDL2
+        SDL2_image::SDL2_image
+        imgui_lib
+)
 
 if (NOT APPLE AND NOT MSVC)
     target_link_options(${PROJECT_NAME} PRIVATE
@@ -95,3 +104,14 @@ if (NOT APPLE AND NOT MSVC)
             "-static-libgcc"
     )
 endif ()
+
+set(ASSETS_DIR "${PROJECT_SOURCE_DIR}/assets")
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+    "${ASSETS_DIR}"
+    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
+    COMMENT "Symlinking assets to build directory..."
+    VERBATIM
+)
+

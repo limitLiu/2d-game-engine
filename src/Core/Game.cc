@@ -1,13 +1,17 @@
 #include "Core/Game.hpp"
-#include "Common.hpp"
 
 #include <SDL.h>
+#include <SDL_image.h>
+#include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 
 using namespace engine;
 
 const i32 WIDTH = 960;
-const i32 HEIGHT = 544;
+const i32 HEIGHT = 540;
+
+static glm::vec2 position;
+static glm::vec2 velocity;
 
 void Game::initialize() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -20,8 +24,8 @@ void Game::initialize() {
     spdlog::error("Failed to create SDL Window.");
     return;
   }
-  _renderer = SDL_CreateRenderer(_window, -1, 0);
-  if (_renderer == nullptr) {
+  _ctx = SDL_CreateRenderer(_window, -1, 0);
+  if (_ctx == nullptr) {
     spdlog::error("Failed to create SDL Window Renderer.");
     return;
   }
@@ -48,17 +52,22 @@ void Game::inputEvent() {
 }
 
 void Game::render() {
-  SDL_SetRenderDrawColor(_renderer, 21, 21, 21, 255);
-  SDL_RenderClear(_renderer);
+  SDL_SetRenderDrawColor(_ctx, 0, 0, 0, 0);
+  SDL_RenderClear(_ctx);
 
-  SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
-  SDL_Rect player = {10, 10, 20, 20};
-  SDL_RenderFillRect(_renderer, &player);
+  auto *surface = IMG_Load("assets/images/tank-tiger-right.png");
+  auto *texture = SDL_CreateTextureFromSurface(_ctx, surface);
+  SDL_FreeSurface(surface);
 
-  SDL_RenderPresent(_renderer);
+  SDL_Rect dstRect = {static_cast<i32>(position.x), static_cast<i32>(position.y), 32, 32};
+  SDL_RenderCopy(_ctx, texture, nullptr, &dstRect);
+  SDL_DestroyTexture(texture);
+
+  SDL_RenderPresent(_ctx);
 }
 
 void Game::run() {
+  setup();
   while (_isRunning) {
     inputEvent();
     update();
@@ -66,8 +75,17 @@ void Game::run() {
   }
 }
 
-void Game::setup() {}
+void Game::setup() {
+  position = glm::vec2(10.0, 20.0);
+  velocity = glm::vec2(1.0, 0.0);
+}
 
-void Game::update() {}
+void Game::update() {
+  while (!SDL_TICKS_PASSED(SDL_GetTicks(), _millisecsPreviousFrame + MILLISECS_PER_FRAME))
+    ;
+  _millisecsPreviousFrame = SDL_GetTicks();
+  position.x += velocity.x;
+  position.y += velocity.y;
+}
 
 void Game::destroy() { SDL_Quit(); }
