@@ -7,7 +7,11 @@ namespace ecs {
 struct Entity {
   Entity(u32 id) : _id(id) {}
 
-  u32 id() const { return _id; }
+  u32 id() const;
+  bool operator==(const Entity &rhs) const;
+  bool operator!=(const Entity &rhs) const;
+  bool operator>(const Entity &rhs) const;
+  bool operator<(const Entity &rhs) const;
 
 private:
   u32 _id;

@@ -81,6 +81,8 @@ endif ()
 add_executable(${PROJECT_NAME}
         src/main.cc
         src/Core/Game.cc
+        src/Core/System.cc
+        src/Core/Entity.cc
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
