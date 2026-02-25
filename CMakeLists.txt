@@ -83,6 +83,8 @@ add_executable(${PROJECT_NAME}
         src/Core/Game.cc
         src/Core/System.cc
         src/Core/Entity.cc
+        src/Core/Registry.cc
+        src/Core/Component.cc
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include)

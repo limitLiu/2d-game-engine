@@ -12,6 +12,8 @@ struct Entity {
   bool operator!=(const Entity &rhs) const;
   bool operator>(const Entity &rhs) const;
   bool operator<(const Entity &rhs) const;
+  bool operator>=(const Entity &rhs) const;
+  bool operator<=(const Entity &rhs) const;
 
 private:
   u32 _id;

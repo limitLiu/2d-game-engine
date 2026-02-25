@@ -30,7 +30,6 @@ template <class T> void System::requireComponent() {
   const auto componentId = Component<T>::GetId();
   _componentSignature.set(componentId);
 }
-
 } // namespace ecs
 
 #endif

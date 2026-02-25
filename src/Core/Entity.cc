@@ -11,3 +11,7 @@ bool Entity::operator!=(const Entity &rhs) const { return id() != rhs.id(); }
 bool Entity::operator>(const Entity &rhs) const { return id() > rhs.id(); }
 
 bool Entity::operator<(const Entity &rhs) const { return id() < rhs.id(); }
+
+bool Entity::operator>=(const Entity &rhs) const { return id() >= rhs.id(); }
+
+bool Entity::operator<=(const Entity &rhs) const { return id() <= rhs.id(); }

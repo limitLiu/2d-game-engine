@@ -5,7 +5,6 @@
 #include <vector>
 
 namespace ecs {
-
 class IPool {
 public:
   virtual ~IPool() {}
