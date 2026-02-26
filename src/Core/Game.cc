@@ -1,4 +1,5 @@
 #include "Core/Game.hpp"
+#include "Core/Base/Entity.hpp"
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -12,6 +13,14 @@ const i32 HEIGHT = 540;
 
 static glm::vec2 position;
 static glm::vec2 velocity;
+
+Game::Game() {
+  _isRunning = false;
+  _registry = std::make_unique<ecs::Registry>();
+  spdlog::info("Game constructor called");
+}
+
+Game::~Game() { spdlog::info("Game destructor called"); }
 
 void Game::initialize() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -76,6 +85,8 @@ void Game::run() {
 }
 
 void Game::setup() {
+  ecs::Entity tank = _registry->createEntity();
+  ecs::Entity trunk = _registry->createEntity();
   position = glm::vec2(10.0, 20.0);
   velocity = glm::vec2(20.0, 0.0);
 }
