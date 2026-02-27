@@ -11,7 +11,7 @@ public:
 };
 
 template <class T> struct Pool : public IPool {
-  Pool(usize n = 128) { resize(n); }
+  explicit Pool(const usize n = 128) { resize(n); }
   virtual ~Pool() = default;
 
   bool isEmpty() const { return _data.empty(); }

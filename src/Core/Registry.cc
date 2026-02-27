@@ -1,6 +1,8 @@
 #include "Core/Base/Registry.hpp"
 #include "Core/Base/System.hpp"
 
+#include <ranges>
+
 using namespace ecs;
 
 Registry::Registry() { spdlog::info("Registry constructor called"); }
@@ -8,9 +10,10 @@ Registry::Registry() { spdlog::info("Registry constructor called"); }
 Registry::~Registry() { spdlog::info("Registry destructor called"); }
 
 Entity Registry::createEntity() {
-  auto entityId = _entitiesCount++;
+  const auto entityId = _entitiesCount++;
   Entity entity(entityId);
-  _entitiesToBeAdded.insert(entity);
+  entity._registry = this;
+  _entities2BeAdded.insert(entity);
   if (entityId >= _entityComponentSignatures.size()) {
     _entityComponentSignatures.resize(entityId + 1);
   }
@@ -18,21 +21,21 @@ Entity Registry::createEntity() {
   return entity;
 }
 
-void Registry::addEntity2Systems(Entity entity) {
+void Registry::addEntity2Systems(const Entity entity) const {
   const auto entityId = entity.id();
   const auto entityComponentSignature = _entityComponentSignatures[entityId];
-  for (auto &system : _systems) {
-    const auto &systemComponentSignature = system.second->componentSignature();
-    bool isInterested = (entityComponentSignature & systemComponentSignature) == systemComponentSignature;
+  for (const auto &value : _systems | std::views::values) {
+    const auto &systemComponentSignature = value->componentSignature();
+    const bool isInterested = (entityComponentSignature & systemComponentSignature) == systemComponentSignature;
     if (isInterested) {
-      system.second->addEntity(entity);
+      value->addEntity(entity);
     }
   }
 }
 
 void Registry::update() {
-  for (auto entity : _entitiesToBeAdded) {
+  for (auto entity : _entities2BeAdded) {
     addEntity2Systems(entity);
   }
-  _entitiesToBeAdded.clear();
+  _entities2BeAdded.clear();
 }

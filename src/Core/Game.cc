@@ -1,5 +1,7 @@
 #include "Core/Game.hpp"
 #include "Core/Base/Entity.hpp"
+#include "Core/Components/RigidBodyComponent.hpp"
+#include "Core/Components/TransformComponent.hpp"
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -8,14 +10,12 @@
 
 using namespace engine;
 
-const i32 WIDTH = 960;
-const i32 HEIGHT = 540;
+constexpr i32 WIDTH = 960;
+constexpr i32 HEIGHT = 540;
 
 static glm::vec2 position;
-static glm::vec2 velocity;
 
 Game::Game() {
-  _isRunning = false;
   _registry = std::make_unique<ecs::Registry>();
   spdlog::info("Game constructor called");
 }
@@ -68,7 +68,7 @@ void Game::render() {
   auto *texture = SDL_CreateTextureFromSurface(_ctx, surface);
   SDL_FreeSurface(surface);
 
-  SDL_Rect dstRect = {static_cast<i32>(position.x), static_cast<i32>(position.y), 32, 32};
+  const SDL_Rect dstRect = {static_cast<i32>(position.x), static_cast<i32>(position.y), 32, 32};
   SDL_RenderCopy(_ctx, texture, nullptr, &dstRect);
   SDL_DestroyTexture(texture);
 
@@ -84,23 +84,24 @@ void Game::run() {
   }
 }
 
-void Game::setup() {
+void Game::setup() const {
   ecs::Entity tank = _registry->createEntity();
-  ecs::Entity trunk = _registry->createEntity();
-  position = glm::vec2(10.0, 20.0);
-  velocity = glm::vec2(20.0, 0.0);
+  tank.addComponent<ecs::TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.addComponent<ecs::RigidBodyComponent>(glm::vec2(20.0, 0.0));
+
+  tank.removeComponent<ecs::TransformComponent>();
 }
 
 void Game::update() {
-  auto wait = MILLISECS_PER_FRAME - SDL_GetTicks() + _millisecsPreviousFrame;
-  if (wait > 0 && wait <= MILLISECS_PER_FRAME) {
+  if (const auto wait = MILLION_SECS_PER_FRAME - SDL_GetTicks() + _millionSecsPreviousFrame;
+      wait > 0 && wait <= MILLION_SECS_PER_FRAME) {
     SDL_Delay(wait);
   }
-  f64 deltaTime = (SDL_GetTicks() - _millisecsPreviousFrame) / 1000.0;
+  const f64 deltaTime = (SDL_GetTicks() - _millionSecsPreviousFrame) / 1000.0;
 
-  _millisecsPreviousFrame = SDL_GetTicks();
-  position.x += velocity.x * deltaTime;
-  position.y += velocity.y * deltaTime;
+  _millionSecsPreviousFrame = SDL_GetTicks();
+  // position.x += velocity.x * deltaTime;
+  // position.y += velocity.y * deltaTime;
 }
 
 void Game::destroy() { SDL_Quit(); }

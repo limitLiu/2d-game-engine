@@ -14,8 +14,6 @@
 #include <vector>
 
 namespace ecs {
-typedef struct System System;
-
 struct Registry {
   Registry();
 
@@ -31,6 +29,8 @@ struct Registry {
 
   template <class T> bool hasComponent(Entity entity) const;
 
+  template <class T> T &component(Entity entity);
+
   template <class T, class... Args> void addSystem(Args &&...args);
 
   template <class T> void removeSystem();
@@ -39,7 +39,7 @@ struct Registry {
 
   template <class T> T &getSystem() const;
 
-  void addEntity2Systems(Entity entity);
+  void addEntity2Systems(Entity entity) const;
 
 private:
   u32 _entitiesCount = 0;
@@ -48,13 +48,13 @@ private:
 
   std::vector<Signature> _entityComponentSignatures;
 
-  std::unordered_map<std::type_index, std::shared_ptr<System>> _systems;
+  std::unordered_map<std::type_index, std::shared_ptr<struct System>> _systems;
 
-  std::set<Entity> _entitiesToBeAdded;
-  std::set<Entity> _entitiesToBeKilled;
+  std::set<Entity> _entities2BeAdded;
+  std::set<Entity> _entities2BeKilled;
 };
 
-template <class T, class... Args> void Registry::addComponent(Entity entity, Args &&...args) {
+template <class T, class... Args> void Registry::addComponent(const Entity entity, Args &&...args) {
   const auto componentId = Component<T>::GetId();
   const auto entityId = entity.id();
 
@@ -75,15 +75,17 @@ template <class T, class... Args> void Registry::addComponent(Entity entity, Arg
   T newComponent(std::forward<Args>(args)...);
   pool->set(entityId, newComponent);
   _entityComponentSignatures[entityId].set(componentId);
+  spdlog::info("Component id = {} was added to entity id = {}", componentId, entityId);
 }
 
-template <class T> void Registry::removeComponent(Entity entity) {
+template <class T> void Registry::removeComponent(const Entity entity) {
   const auto componentId = Component<T>::GetId();
   const auto entityId = entity.id();
   _entityComponentSignatures[entityId].set(componentId, false);
+  spdlog::info("Component id = {} was removed from entity id = {}", componentId, entityId);
 }
 
-template <class T> bool Registry::hasComponent(Entity entity) const {
+template <class T> bool Registry::hasComponent(const Entity entity) const {
   const auto componentId = Component<T>::GetId();
   const auto entityId = entity.id();
   return _entityComponentSignatures[entityId].test(componentId);
@@ -108,6 +110,23 @@ template <class T> T &Registry::getSystem() const {
   const auto system = _systems.find(std::type_index(typeid(T)));
   return *(std::static_pointer_cast<T>(system->second));
 }
+
+template <class T> T &Registry::component(const Entity entity) {
+  const auto componentId = Component<T>::GetId();
+  const auto entityId = entity.id();
+  auto pool = std::static_pointer_cast<Pool<T>>(_componentPools[componentId]);
+  return pool->get(entityId);
+}
+
+template <class T, class... Args> void Entity::addComponent(Args &&...args) {
+  _registry->addComponent<T>(*this, std::forward<Args>(args)...);
+}
+
+template <class T> void Entity::removeComponent() const { _registry->removeComponent<T>(*this); }
+
+template <class T> bool Entity::hasComponent() const { return _registry->hasComponent<T>(*this); }
+
+template <class T> T &Entity::component() const { return _registry->component<T>(*this); }
 } // namespace ecs
 
 #endif

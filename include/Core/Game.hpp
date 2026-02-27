@@ -8,8 +8,8 @@ typedef struct SDL_Renderer SDL_Renderer;
 #include "Core/Base/Registry.hpp"
 
 namespace engine {
-const i32 FPS = 60;
-const f32 MILLISECS_PER_FRAME = 1000 / FPS;
+constexpr i32 FPS = 60;
+constexpr f32 MILLION_SECS_PER_FRAME = 1000 / FPS;
 
 struct Game {
   Game();
@@ -27,13 +27,13 @@ struct Game {
 
   void render();
 
-  void setup();
+  void setup() const;
 
 private:
-  SDL_Window *_window;
-  SDL_Renderer *_ctx;
-  bool _isRunning;
-  i32 _millisecsPreviousFrame{0};
+  SDL_Window *_window{nullptr};
+  SDL_Renderer *_ctx{nullptr};
+  bool _isRunning{false};
+  i32 _millionSecsPreviousFrame{0};
   std::unique_ptr<ecs::Registry> _registry;
 };
 } // namespace engine
