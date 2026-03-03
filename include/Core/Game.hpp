@@ -30,11 +30,11 @@ struct Game {
   void setup() const;
 
 private:
-  SDL_Window *_window{nullptr};
-  SDL_Renderer *_ctx{nullptr};
-  bool _isRunning{false};
-  i32 _millionSecsPreviousFrame{0};
-  std::unique_ptr<ecs::Registry> _registry;
+  SDL_Window *m_window{nullptr};
+  SDL_Renderer *m_ctx{nullptr};
+  bool m_isRunning{false};
+  i32 m_millionSecsPreviousFrame{0};
+  std::unique_ptr<ecs::Registry> m_registry;
 };
 } // namespace engine
 

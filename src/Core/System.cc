@@ -6,8 +6,7 @@ using namespace ecs;
 void System::addEntity(Entity entity) { _entities.emplace_back(entity); }
 
 void System::removeEntity(Entity entity) {
-  _entities.erase(std::remove_if(_entities.begin(), _entities.end(), [&entity](Entity rest) { return entity == rest; }),
-                  _entities.end());
+  std::erase_if(_entities, [&entity](const Entity rest) { return entity == rest; });
 }
 
 const Signature &System::componentSignature() const { return _componentSignature; }

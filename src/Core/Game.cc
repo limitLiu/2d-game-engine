@@ -1,10 +1,11 @@
 #include "Core/Game.hpp"
 #include "Core/Base/Entity.hpp"
 #include "Core/Components/RigidBodyComponent.hpp"
+#include "Core/Components/SpriteComponent.hpp"
 #include "Core/Components/TransformComponent.hpp"
+#include "Core/Systems/MovementSystem.hpp"
+#include "Core/Systems/RenderSystem.hpp"
 
-#include <SDL.h>
-#include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 
@@ -16,7 +17,7 @@ constexpr i32 HEIGHT = 540;
 static glm::vec2 position;
 
 Game::Game() {
-  _registry = std::make_unique<ecs::Registry>();
+  m_registry = std::make_unique<ecs::Registry>();
   spdlog::info("Game constructor called");
 }
 
@@ -27,19 +28,19 @@ void Game::initialize() {
     spdlog::error("SDL Error: {}", SDL_GetError());
     return;
   }
-  _window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT,
-                             SDL_WINDOW_BORDERLESS);
-  if (_window == nullptr) {
+  m_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT,
+                              SDL_WINDOW_BORDERLESS);
+  if (m_window == nullptr) {
     spdlog::error("Failed to create SDL Window.");
     return;
   }
-  _ctx = SDL_CreateRenderer(_window, -1, 0);
-  if (_ctx == nullptr) {
+  m_ctx = SDL_CreateRenderer(m_window, -1, 0);
+  if (m_ctx == nullptr) {
     spdlog::error("Failed to create SDL Window Renderer.");
     return;
   }
-  SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
-  _isRunning = true;
+  SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
+  m_isRunning = true;
 }
 
 void Game::inputEvent() {
@@ -47,11 +48,11 @@ void Game::inputEvent() {
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
     case SDL_QUIT:
-      _isRunning = false;
+      m_isRunning = false;
       break;
     case SDL_KEYDOWN:
       if (event.key.keysym.sym == SDLK_ESCAPE) {
-        _isRunning = false;
+        m_isRunning = false;
       }
       break;
     default:
@@ -61,23 +62,15 @@ void Game::inputEvent() {
 }
 
 void Game::render() {
-  SDL_SetRenderDrawColor(_ctx, 0, 0, 0, 0);
-  SDL_RenderClear(_ctx);
-
-  auto *surface = IMG_Load("assets/images/tank-tiger-right.png");
-  auto *texture = SDL_CreateTextureFromSurface(_ctx, surface);
-  SDL_FreeSurface(surface);
-
-  const SDL_Rect dstRect = {static_cast<i32>(position.x), static_cast<i32>(position.y), 32, 32};
-  SDL_RenderCopy(_ctx, texture, nullptr, &dstRect);
-  SDL_DestroyTexture(texture);
-
-  SDL_RenderPresent(_ctx);
+  SDL_SetRenderDrawColor(m_ctx, 0, 0, 0, 0);
+  SDL_RenderClear(m_ctx);
+  m_registry->system<ecs::RenderSystem>().update(m_ctx);
+  SDL_RenderPresent(m_ctx);
 }
 
 void Game::run() {
   setup();
-  while (_isRunning) {
+  while (m_isRunning) {
     inputEvent();
     update();
     render();
@@ -85,23 +78,28 @@ void Game::run() {
 }
 
 void Game::setup() const {
-  ecs::Entity tank = _registry->createEntity();
+  m_registry->addSystem<ecs::MovementSystem>();
+  m_registry->addSystem<ecs::RenderSystem>();
+
+  ecs::Entity tank = m_registry->createEntity();
   tank.addComponent<ecs::TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
   tank.addComponent<ecs::RigidBodyComponent>(glm::vec2(20.0, 0.0));
-
-  tank.removeComponent<ecs::TransformComponent>();
+  tank.addComponent<ecs::SpriteComponent>(32, 32);
 }
 
 void Game::update() {
-  if (const auto wait = MILLION_SECS_PER_FRAME - SDL_GetTicks() + _millionSecsPreviousFrame;
+  if (const auto wait = MILLION_SECS_PER_FRAME - SDL_GetTicks() + m_millionSecsPreviousFrame;
       wait > 0 && wait <= MILLION_SECS_PER_FRAME) {
     SDL_Delay(wait);
   }
-  const f64 deltaTime = (SDL_GetTicks() - _millionSecsPreviousFrame) / 1000.0;
-
-  _millionSecsPreviousFrame = SDL_GetTicks();
-  // position.x += velocity.x * deltaTime;
-  // position.y += velocity.y * deltaTime;
+  const f64 deltaTime = (SDL_GetTicks() - m_millionSecsPreviousFrame) / 1000.0;
+  m_millionSecsPreviousFrame = SDL_GetTicks();
+  m_registry->update();
+  m_registry->system<ecs::MovementSystem>().update(deltaTime);
 }
 
-void Game::destroy() { SDL_Quit(); }
+void Game::destroy() {
+  SDL_DestroyRenderer(m_ctx);
+  SDL_DestroyWindow(m_window);
+  SDL_Quit();
+}

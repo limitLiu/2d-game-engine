@@ -5,9 +5,9 @@
 
 namespace ecs {
 struct Entity {
-  explicit Entity(const u32 id) : _id(id) {}
+  explicit Entity(const u32 id) : m_id(id) {}
 
-  struct Registry *_registry{nullptr};
+  struct Registry *m_registry{nullptr};
 
   u32 id() const;
 
@@ -27,7 +27,7 @@ struct Entity {
   template <class T> T &component() const;
 
 private:
-  u32 _id;
+  u32 m_id;
 };
 } // namespace ecs
 

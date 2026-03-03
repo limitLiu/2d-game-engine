@@ -37,7 +37,7 @@ struct Registry {
 
   template <class T> bool hasSystem() const;
 
-  template <class T> T &getSystem() const;
+  template <class T> T &system() const;
 
   void addEntity2Systems(Entity entity) const;
 
@@ -106,7 +106,7 @@ template <class T> bool Registry::hasSystem() const {
   return system != _systems.end();
 }
 
-template <class T> T &Registry::getSystem() const {
+template <class T> T &Registry::system() const {
   const auto system = _systems.find(std::type_index(typeid(T)));
   return *(std::static_pointer_cast<T>(system->second));
 }
@@ -119,14 +119,14 @@ template <class T> T &Registry::component(const Entity entity) {
 }
 
 template <class T, class... Args> void Entity::addComponent(Args &&...args) {
-  _registry->addComponent<T>(*this, std::forward<Args>(args)...);
+  m_registry->addComponent<T>(*this, std::forward<Args>(args)...);
 }
 
-template <class T> void Entity::removeComponent() const { _registry->removeComponent<T>(*this); }
+template <class T> void Entity::removeComponent() const { m_registry->removeComponent<T>(*this); }
 
-template <class T> bool Entity::hasComponent() const { return _registry->hasComponent<T>(*this); }
+template <class T> bool Entity::hasComponent() const { return m_registry->hasComponent<T>(*this); }
 
-template <class T> T &Entity::component() const { return _registry->component<T>(*this); }
+template <class T> T &Entity::component() const { return m_registry->component<T>(*this); }
 } // namespace ecs
 
 #endif

@@ -18,7 +18,7 @@ using isize = ssize_t;
 using f32 = float;
 using f64 = double;
 
-const u32 MAX_COMPONENTS = 32;
+constexpr u32 MAX_COMPONENTS = 32;
 
 using Signature = std::bitset<MAX_COMPONENTS>;
 

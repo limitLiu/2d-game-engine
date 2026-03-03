@@ -12,7 +12,7 @@ Registry::~Registry() { spdlog::info("Registry destructor called"); }
 Entity Registry::createEntity() {
   const auto entityId = _entitiesCount++;
   Entity entity(entityId);
-  entity._registry = this;
+  entity.m_registry = this;
   _entities2BeAdded.insert(entity);
   if (entityId >= _entityComponentSignatures.size()) {
     _entityComponentSignatures.resize(entityId + 1);
