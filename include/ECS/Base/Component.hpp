@@ -3,7 +3,7 @@
 
 #include "Common.hpp"
 
-namespace ecs {
+namespace ECS {
 struct IComponent {
 protected:
   static u32 nextId;
@@ -15,6 +15,6 @@ template <class T> struct Component : public IComponent {
     return id;
   }
 };
-} // namespace ecs
+} // namespace ECS
 
 #endif

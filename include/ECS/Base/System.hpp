@@ -2,11 +2,11 @@
 #define SYSTEM_HPP
 
 #include "Common.hpp"
-#include "Core/Base/Component.hpp"
-#include "Core/Base/Entity.hpp"
+#include "ECS/Base/Component.hpp"
+#include "ECS/Base/Entity.hpp"
 #include <vector>
 
-namespace ecs {
+namespace ECS {
 struct System {
   System() = default;
   ~System() = default;
@@ -30,6 +30,6 @@ template <class T> void System::requireComponent() {
   const auto componentId = Component<T>::GetId();
   _componentSignature.set(componentId);
 }
-} // namespace ecs
+} // namespace ECS
 
 #endif

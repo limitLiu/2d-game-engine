@@ -1,15 +1,18 @@
-#include "Core/Game.hpp"
-#include "Core/Base/Entity.hpp"
-#include "Core/Components/RigidBodyComponent.hpp"
-#include "Core/Components/SpriteComponent.hpp"
-#include "Core/Components/TransformComponent.hpp"
-#include "Core/Systems/MovementSystem.hpp"
-#include "Core/Systems/RenderSystem.hpp"
+#include "ECS/Game.hpp"
+#include "ECS/Base/Entity.hpp"
+#include "ECS/Base/Registry.hpp"
+#include "ECS/Components/RigidBodyComponent.hpp"
+#include "ECS/Components/SpriteComponent.hpp"
+#include "ECS/Components/TransformComponent.hpp"
+#include "ECS/Systems/MovementSystem.hpp"
+#include "ECS/Systems/RenderSystem.hpp"
+
+#include "AssetStore/AssetStore.hpp"
 
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 
-using namespace engine;
+using namespace Engine;
 
 constexpr i32 WIDTH = 960;
 constexpr i32 HEIGHT = 540;
@@ -17,7 +20,8 @@ constexpr i32 HEIGHT = 540;
 static glm::vec2 position;
 
 Game::Game() {
-  m_registry = std::make_unique<ecs::Registry>();
+  m_registry = std::make_unique<ECS::Registry>();
+  m_assetStore = std::make_unique<AssetStore>();
   spdlog::info("Game constructor called");
 }
 
@@ -64,7 +68,7 @@ void Game::inputEvent() {
 void Game::render() {
   SDL_SetRenderDrawColor(m_ctx, 0, 0, 0, 0);
   SDL_RenderClear(m_ctx);
-  m_registry->system<ecs::RenderSystem>().update(m_ctx);
+  m_registry->system<ECS::RenderSystem>().update(m_ctx, m_assetStore);
   SDL_RenderPresent(m_ctx);
 }
 
@@ -77,15 +81,24 @@ void Game::run() {
   }
 }
 
-void Game::setup() const {
-  m_registry->addSystem<ecs::MovementSystem>();
-  m_registry->addSystem<ecs::RenderSystem>();
+void Game::loadLevel(i32 level) {
+  m_registry->addSystem<ECS::MovementSystem>();
+  m_registry->addSystem<ECS::RenderSystem>();
+  m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
+  m_assetStore->addTexture(m_ctx, "truck-ford-down", "assets/images/truck-ford-down.png");
 
-  ecs::Entity tank = m_registry->createEntity();
-  tank.addComponent<ecs::TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
-  tank.addComponent<ecs::RigidBodyComponent>(glm::vec2(20.0, 0.0));
-  tank.addComponent<ecs::SpriteComponent>(32, 32);
+  ECS::Entity tank = m_registry->createEntity();
+  tank.addComponent<ECS::TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.addComponent<ECS::RigidBodyComponent>(glm::vec2(20.0, 0.0));
+  tank.addComponent<ECS::SpriteComponent>("tank-panther-right", 32, 32);
+
+  ECS::Entity truck = m_registry->createEntity();
+  truck.addComponent<ECS::TransformComponent>(glm::vec2(30.0, 40.0), glm::vec2(1.0, 1.0), 0.0);
+  truck.addComponent<ECS::RigidBodyComponent>(glm::vec2(0.0, 20.0));
+  truck.addComponent<ECS::SpriteComponent>("truck-ford-down", 32, 32);
 }
+
+void Game::setup() { loadLevel(1); }
 
 void Game::update() {
   if (const auto wait = MILLION_SECS_PER_FRAME - SDL_GetTicks() + m_millionSecsPreviousFrame;
@@ -95,7 +108,7 @@ void Game::update() {
   const f64 deltaTime = (SDL_GetTicks() - m_millionSecsPreviousFrame) / 1000.0;
   m_millionSecsPreviousFrame = SDL_GetTicks();
   m_registry->update();
-  m_registry->system<ecs::MovementSystem>().update(deltaTime);
+  m_registry->system<ECS::MovementSystem>().update(deltaTime);
 }
 
 void Game::destroy() {

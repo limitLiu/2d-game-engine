@@ -3,7 +3,7 @@
 
 #include "Common.hpp"
 
-namespace ecs {
+namespace ECS {
 struct Entity {
   explicit Entity(const u32 id) : m_id(id) {}
 
@@ -29,6 +29,6 @@ struct Entity {
 private:
   u32 m_id;
 };
-} // namespace ecs
+} // namespace ECS
 
 #endif

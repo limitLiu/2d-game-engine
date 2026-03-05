@@ -79,12 +79,13 @@ if (imgui_POPULATED)
 endif ()
 
 add_executable(${PROJECT_NAME}
-        src/main.cc
-        src/Core/Game.cc
-        src/Core/System.cc
-        src/Core/Entity.cc
-        src/Core/Registry.cc
-        src/Core/Component.cc
+    src/main.cc
+    src/ECS/Game.cc
+    src/ECS/System.cc
+    src/ECS/Entity.cc
+    src/ECS/Registry.cc
+    src/ECS/Component.cc
+    src/AssetStore/AssetStore.cc
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include)

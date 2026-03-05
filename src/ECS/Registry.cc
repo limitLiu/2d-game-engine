@@ -1,9 +1,9 @@
-#include "Core/Base/Registry.hpp"
-#include "Core/Base/System.hpp"
+#include "ECS/Base/Registry.hpp"
+#include "ECS/Base/System.hpp"
 
 #include <ranges>
 
-using namespace ecs;
+using namespace ECS;
 
 Registry::Registry() { spdlog::info("Registry constructor called"); }
 

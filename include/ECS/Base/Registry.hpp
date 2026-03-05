@@ -2,9 +2,9 @@
 #define REGISTRY_HPP
 
 #include "Common.hpp"
-#include "Core/Base/Component.hpp"
-#include "Core/Base/Entity.hpp"
-#include "Core/Base/Pool.hpp"
+#include "ECS/Base/Component.hpp"
+#include "ECS/Base/Entity.hpp"
+#include "ECS/Base/Pool.hpp"
 #include <memory>
 #include <set>
 #include <spdlog/spdlog.h>
@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-namespace ecs {
+namespace ECS {
 struct Registry {
   Registry();
 
@@ -127,6 +127,6 @@ template <class T> void Entity::removeComponent() const { m_registry->removeComp
 template <class T> bool Entity::hasComponent() const { return m_registry->hasComponent<T>(*this); }
 
 template <class T> T &Entity::component() const { return m_registry->component<T>(*this); }
-} // namespace ecs
+} // namespace ECS
 
 #endif

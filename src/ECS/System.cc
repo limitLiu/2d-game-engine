@@ -1,7 +1,7 @@
-#include "Core/Base/System.hpp"
+#include "ECS/Base/System.hpp"
 #include <algorithm>
 
-using namespace ecs;
+using namespace ECS;
 
 void System::addEntity(Entity entity) { _entities.emplace_back(entity); }
 

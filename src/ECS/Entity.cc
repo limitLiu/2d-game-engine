@@ -1,6 +1,6 @@
-#include "Core/Base/Entity.hpp"
+#include "ECS/Base/Entity.hpp"
 
-using namespace ecs;
+using namespace ECS;
 
 u32 Entity::id() const { return m_id; }
 

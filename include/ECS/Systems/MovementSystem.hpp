@@ -1,11 +1,11 @@
 #ifndef MOVEMENT_SYSTEM_HPP
 #define MOVEMENT_SYSTEM_HPP
 
-#include "Core/Base/System.hpp"
-#include "Core/Components/RigidBodyComponent.hpp"
-#include "Core/Components/TransformComponent.hpp"
+#include "ECS/Base/System.hpp"
+#include "ECS/Components/RigidBodyComponent.hpp"
+#include "ECS/Components/TransformComponent.hpp"
 
-namespace ecs {
+namespace ECS {
 struct MovementSystem : public System {
   MovementSystem() {
     requireComponent<TransformComponent>();
@@ -21,6 +21,6 @@ struct MovementSystem : public System {
     }
   }
 };
-} // namespace ecs
+} // namespace ECS
 
 #endif

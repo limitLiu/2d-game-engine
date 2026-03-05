@@ -4,7 +4,7 @@
 #include "Common.hpp"
 #include <vector>
 
-namespace ecs {
+namespace ECS {
 class IPool {
 public:
   virtual ~IPool() {}
@@ -33,6 +33,6 @@ template <class T> struct Pool : public IPool {
 private:
   std::vector<T> _data;
 };
-} // namespace ecs
+} // namespace ECS
 
 #endif

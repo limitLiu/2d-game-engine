@@ -1,7 +1,7 @@
-#include "Core/Game.hpp"
+#include "../include/ECS/Game.hpp"
 
 auto main(int argc, char *argv[]) -> int {
-  engine::Game game;
+  Engine::Game game;
   game.initialize();
   game.run();
 

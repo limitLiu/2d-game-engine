@@ -4,7 +4,7 @@
 #include "Common.hpp"
 #include <glm/glm.hpp>
 
-namespace ecs {
+namespace ECS {
 struct TransformComponent {
   glm::vec2 position() const { return m_position; }
   glm::vec2 scale() const { return m_scale; }
@@ -18,6 +18,6 @@ struct TransformComponent {
   glm::vec2 m_scale;
   f64 m_rotation;
 };
-} // namespace ecs
+} // namespace ECS
 
 #endif
