@@ -1,14 +1,13 @@
 #include "ECS/Base/System.hpp"
-#include <algorithm>
 
 using namespace ECS;
 
-void System::addEntity(Entity entity) { _entities.emplace_back(entity); }
+void System::addEntity(Entity entity) { m_entities.emplace_back(entity); }
 
 void System::removeEntity(Entity entity) {
-  std::erase_if(_entities, [&entity](const Entity rest) { return entity == rest; });
+  std::erase_if(m_entities, [&entity](const Entity rest) { return entity == rest; });
 }
 
-const Signature &System::componentSignature() const { return _componentSignature; }
+const Signature &System::componentSignature() const { return m_componentSignature; }
 
-std::vector<Entity> System::entities() const { return _entities; }
+std::vector<Entity> System::entities() const { return m_entities; }

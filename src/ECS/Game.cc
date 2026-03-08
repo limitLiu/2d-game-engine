@@ -9,6 +9,8 @@
 
 #include "AssetStore/AssetStore.hpp"
 
+#include <cstdlib>
+#include <fstream>
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 
@@ -86,16 +88,39 @@ void Game::loadLevel(i32 level) {
   m_registry->addSystem<ECS::RenderSystem>();
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-down", "assets/images/truck-ford-down.png");
+  m_assetStore->addTexture(m_ctx, "jungle", "assets/tilemaps/jungle.png");
+
+  i32 tileSize = 32;
+  f64 tileScale = 2.0;
+  i32 mapNumCols = 25;
+  i32 mapNumRows = 20;
+  std::fstream mapFile;
+  mapFile.open("assets/tilemaps/jungle.map");
+  for (i32 y = 0; y < mapNumRows; ++y) {
+    for (i32 x = 0; x < mapNumCols; ++x) {
+      char ch;
+      mapFile.get(ch);
+      i32 srcRectY = std::atoi(&ch) * tileSize;
+      mapFile.get(ch);
+      i32 srcRectX = std::atoi(&ch) * tileSize;
+      mapFile.ignore();
+      ECS::Entity tile = m_registry->createEntity();
+      tile.addComponent<ECS::TransformComponent>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)),
+                                                 glm::vec2(tileScale, tileScale), 0);
+      tile.addComponent<ECS::SpriteComponent>("jungle", tileSize, tileSize, 0, srcRectX, srcRectY);
+    }
+  }
+  mapFile.close();
 
   ECS::Entity tank = m_registry->createEntity();
   tank.addComponent<ECS::TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
   tank.addComponent<ECS::RigidBodyComponent>(glm::vec2(20.0, 0.0));
-  tank.addComponent<ECS::SpriteComponent>("tank-panther-right", 32, 32);
+  tank.addComponent<ECS::SpriteComponent>("tank-panther-right", 32, 32, 1);
 
   ECS::Entity truck = m_registry->createEntity();
   truck.addComponent<ECS::TransformComponent>(glm::vec2(30.0, 40.0), glm::vec2(1.0, 1.0), 0.0);
   truck.addComponent<ECS::RigidBodyComponent>(glm::vec2(0.0, 20.0));
-  truck.addComponent<ECS::SpriteComponent>("truck-ford-down", 32, 32);
+  truck.addComponent<ECS::SpriteComponent>("truck-ford-down", 32, 32, 1);
 }
 
 void Game::setup() { loadLevel(1); }

@@ -10,6 +10,8 @@ typedef struct SDL_Renderer SDL_Renderer;
 
 #include "Common.hpp"
 
+#include <memory>
+
 namespace Engine {
 constexpr i32 FPS = 60;
 constexpr f32 MILLION_SECS_PER_FRAME = 1000 / FPS;

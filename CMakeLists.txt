@@ -12,9 +12,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Lua REQUIRED)
 if (APPLE AND EXISTS "/opt/homebrew/include/lua")
-    set(LUA_INCLUDE_DIR "/opt/homebrew/include/lua" ${LUA_INCLUDE_DIR})
+    set(LUA_INCLUDE_DIR "/opt/homebrew/opt/lua/include/lua")
+    set(LUA_LIBRARY "/opt/homebrew/opt/lua/lib/liblua.dylib")
+else ()
+    find_package(Lua REQUIRED)
 endif ()
 
 find_package(SDL2 REQUIRED)

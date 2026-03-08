@@ -22,13 +22,13 @@ struct System {
   const Signature &componentSignature() const;
 
 private:
-  Signature _componentSignature;
-  std::vector<Entity> _entities;
+  Signature m_componentSignature;
+  std::vector<Entity> m_entities;
 };
 
 template <class T> void System::requireComponent() {
   const auto componentId = Component<T>::GetId();
-  _componentSignature.set(componentId);
+  m_componentSignature.set(componentId);
 }
 } // namespace ECS
 
