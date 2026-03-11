@@ -14,8 +14,8 @@
 namespace ECS {
 struct RenderSystem : public System {
   RenderSystem() {
-    requireComponent<struct TransformComponent>();
-    requireComponent<struct SpriteComponent>();
+    requireComponent<TransformComponent>();
+    requireComponent<SpriteComponent>();
   }
 
   void update(SDL_Renderer *context, std::unique_ptr<Engine::AssetStore> &store) {
@@ -31,14 +31,11 @@ struct RenderSystem : public System {
       renderableEntities.emplace_back(e);
     }
 
-    std::sort(renderableEntities.begin(), renderableEntities.end(),
-              [](const RenderableEntity &a, const RenderableEntity &b) {
-                return a.spriteComponent.zIndex() < b.spriteComponent.zIndex();
-              });
+    std::ranges::sort(renderableEntities, [](const RenderableEntity &a, const RenderableEntity &b) {
+      return a.spriteComponent.zIndex() < b.spriteComponent.zIndex();
+    });
 
-    for (const auto entity : renderableEntities) {
-      const auto transformComponent = entity.transformComponent;
-      const auto spriteComponent = entity.spriteComponent;
+    for (const auto [transformComponent, spriteComponent] : renderableEntities) {
       auto *texture = store->textures(spriteComponent.assetID());
       const auto srcRect = spriteComponent.srcRect();
       const SDL_Rect dstRect = {static_cast<i32>(transformComponent.position().x),

@@ -34,7 +34,7 @@ void Registry::addEntity2Systems(const Entity entity) const {
 }
 
 void Registry::update() {
-  for (auto entity : _entities2BeAdded) {
+  for (const auto entity : _entities2BeAdded) {
     addEntity2Systems(entity);
   }
   _entities2BeAdded.clear();

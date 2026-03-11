@@ -1,4 +1,4 @@
-#include "../include/ECS/Game.hpp"
+#include "ECS/Game.hpp"
 
 auto main(int argc, char *argv[]) -> int {
   Engine::Game game;
