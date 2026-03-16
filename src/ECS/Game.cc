@@ -2,6 +2,7 @@
 #include "ECS/Base/Entity.hpp"
 #include "ECS/Base/Registry.hpp"
 #include "ECS/Components/AnimationComponent.hpp"
+#include "ECS/Components/BoxColliderComponent.hpp"
 #include "ECS/Components/RigidBodyComponent.hpp"
 #include "ECS/Components/SpriteComponent.hpp"
 #include "ECS/Components/TransformComponent.hpp"
@@ -10,6 +11,7 @@
 
 #include "AssetStore/AssetStore.hpp"
 #include "ECS/Systems/AnimationSystem.hpp"
+#include "ECS/Systems/CollisionSystem.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -89,8 +91,10 @@ void Game::loadLevel(i32 level) {
   m_registry->addSystem<ECS::MovementSystem>();
   m_registry->addSystem<ECS::RenderSystem>();
   m_registry->addSystem<ECS::AnimationSystem>();
+  m_registry->addSystem<ECS::CollisionSystem>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
+  m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-down", "assets/images/truck-ford-down.png");
   m_assetStore->addTexture(m_ctx, "jungle", "assets/tilemaps/jungle.png");
   m_assetStore->addTexture(m_ctx, "chopper", "assets/images/chopper.png");
@@ -122,11 +126,13 @@ void Game::loadLevel(i32 level) {
   tank.addComponent<ECS::TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
   tank.addComponent<ECS::RigidBodyComponent>(glm::vec2(10.0, 0.0));
   tank.addComponent<ECS::SpriteComponent>("tank-panther-right", 32, 32, 1);
+  tank.addComponent<ECS::BoxColliderComponent>(32, 32);
 
   ECS::Entity truck = m_registry->createEntity();
-  truck.addComponent<ECS::TransformComponent>(glm::vec2(30.0, 40.0), glm::vec2(1.0, 1.0), 0.0);
-  truck.addComponent<ECS::RigidBodyComponent>(glm::vec2(0.0, 20.0));
-  truck.addComponent<ECS::SpriteComponent>("truck-ford-down", 32, 32, 1);
+  truck.addComponent<ECS::TransformComponent>(glm::vec2(30.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
+  truck.addComponent<ECS::RigidBodyComponent>(glm::vec2(0.0, 0.0));
+  truck.addComponent<ECS::SpriteComponent>("truck-ford-up", 32, 32, 1);
+  truck.addComponent<ECS::BoxColliderComponent>(32, 32);
 
   ECS::Entity chopper = m_registry->createEntity();
   chopper.addComponent<ECS::TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -153,6 +159,7 @@ void Game::update() {
   m_registry->update();
   m_registry->system<ECS::MovementSystem>().update(deltaTime);
   m_registry->system<ECS::AnimationSystem>().update(deltaTime);
+  m_registry->system<ECS::CollisionSystem>().update();
 }
 
 void Game::destroy() {
