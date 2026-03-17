@@ -1,4 +1,5 @@
 #include "ECS/Game.hpp"
+#include "AssetStore/AssetStore.hpp"
 #include "ECS/Base/Entity.hpp"
 #include "ECS/Base/Registry.hpp"
 #include "ECS/Components/AnimationComponent.hpp"
@@ -6,12 +7,11 @@
 #include "ECS/Components/RigidBodyComponent.hpp"
 #include "ECS/Components/SpriteComponent.hpp"
 #include "ECS/Components/TransformComponent.hpp"
-#include "ECS/Systems/MovementSystem.hpp"
-#include "ECS/Systems/RenderSystem.hpp"
-
-#include "AssetStore/AssetStore.hpp"
 #include "ECS/Systems/AnimationSystem.hpp"
 #include "ECS/Systems/CollisionSystem.hpp"
+#include "ECS/Systems/MovementSystem.hpp"
+#include "ECS/Systems/RenderColliderSystem.hpp"
+#include "ECS/Systems/RenderSystem.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -22,8 +22,6 @@ using namespace Engine;
 
 constexpr i32 WIDTH = 960;
 constexpr i32 HEIGHT = 540;
-
-static glm::vec2 position;
 
 Game::Game() {
   m_registry = std::make_unique<ECS::Registry>();
@@ -75,6 +73,7 @@ void Game::render() {
   SDL_SetRenderDrawColor(m_ctx, 0, 0, 0, 0);
   SDL_RenderClear(m_ctx);
   m_registry->system<ECS::RenderSystem>().update(m_ctx, m_assetStore);
+  m_registry->system<ECS::RenderColliderSystem>().update(m_ctx);
   SDL_RenderPresent(m_ctx);
 }
 
@@ -92,6 +91,7 @@ void Game::loadLevel(i32 level) {
   m_registry->addSystem<ECS::RenderSystem>();
   m_registry->addSystem<ECS::AnimationSystem>();
   m_registry->addSystem<ECS::CollisionSystem>();
+  m_registry->addSystem<ECS::RenderColliderSystem>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");

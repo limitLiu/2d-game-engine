@@ -11,6 +11,8 @@ struct Entity {
 
   u32 id() const;
 
+  void kill() const;
+
   bool operator==(const Entity &rhs) const;
   bool operator!=(const Entity &rhs) const;
   bool operator>(const Entity &rhs) const;

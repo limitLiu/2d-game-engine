@@ -82,7 +82,7 @@ endif ()
 
 add_executable(${PROJECT_NAME}
     src/main.cc
-    src/ECS/Game.cc
+    src/Game.cc
     src/ECS/System.cc
     src/ECS/Entity.cc
     src/ECS/Registry.cc

@@ -31,6 +31,8 @@ struct CollisionSystem : public System {
                                bTransform.position().x, bTransform.position().y, bCollider.width(), bCollider.height());
         if (collisionHappened) {
           spdlog::info("Entity {} is colliding with entity {}", a.id(), b.id());
+          a.kill();
+          b.kill();
         }
       }
     }
