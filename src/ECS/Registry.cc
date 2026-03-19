@@ -3,7 +3,7 @@
 
 #include <ranges>
 
-using namespace ECS;
+using namespace Engine::ECS;
 
 Registry::Registry() { spdlog::info("Registry constructor called"); }
 
@@ -33,11 +33,11 @@ void Registry::killEntity(const Entity entity) { m_entities2BeKilled.insert(enti
 void Registry::addEntity2Systems(const Entity entity) const {
   const auto entityId = entity.id();
   const auto entityComponentSignature = m_entityComponentSignatures[entityId];
-  for (const auto &value : m_systems | std::views::values) {
-    const auto &systemComponentSignature = value->componentSignature();
+  for (const auto [_, snd] : systems()) {
+    const auto &systemComponentSignature = snd->componentSignature();
     const bool isInterested = (entityComponentSignature & systemComponentSignature) == systemComponentSignature;
     if (isInterested) {
-      value->addEntity(entity);
+      snd->addEntity(entity);
     }
   }
 }

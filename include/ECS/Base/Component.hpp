@@ -3,18 +3,18 @@
 
 #include "Common.hpp"
 
-namespace ECS {
+namespace Engine::ECS {
 struct IComponent {
 protected:
-  static u32 nextId;
+  static u32 s_nextId;
 };
 
 template <class T> struct Component : public IComponent {
   static u32 GetId() {
-    static auto id = nextId++;
+    static auto id = s_nextId++;
     return id;
   }
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

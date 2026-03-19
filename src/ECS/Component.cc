@@ -1,5 +1,5 @@
 #include "ECS/Base/Component.hpp"
 
-using namespace ECS;
+using namespace Engine::ECS;
 
-u32 IComponent::nextId = 0;
+u32 IComponent::s_nextId = 0;

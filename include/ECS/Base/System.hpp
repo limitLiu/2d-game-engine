@@ -6,7 +6,7 @@
 #include "ECS/Base/Entity.hpp"
 #include <vector>
 
-namespace ECS {
+namespace Engine::ECS {
 struct System {
   System() = default;
   ~System() = default;
@@ -30,6 +30,6 @@ template <class T> void System::requireComponent() {
   const auto componentId = Component<T>::GetId();
   m_componentSignature.set(componentId);
 }
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

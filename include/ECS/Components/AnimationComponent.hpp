@@ -4,26 +4,17 @@
 #include "Common.hpp"
 #include <SDL.h>
 
-namespace ECS {
+namespace Engine::ECS {
 struct AnimationComponent {
-  AnimationComponent(const i32 frames = 1, const i32 frameSpeedRate = 1, const bool isLoop = true)
-      : m_currentFrame(1), m_frames(frames), m_frameSpeedRate(frameSpeedRate), m_isLoop(isLoop),
-        m_startedAt(SDL_GetTicks()) {}
+  i32 currentFrame;
+  i32 frames;
+  i32 frameSpeedRate;
+  bool isLoop;
+  i32 startedAt;
 
-  i32 frames() const { return m_frames; }
-  i32 frameSpeedRate() const { return m_frameSpeedRate; }
-  i32 currentFrame() const { return m_currentFrame; }
-  bool isLoop() const { return m_isLoop; }
-  i32 startedAt() const { return m_startedAt; }
-
-  i32 m_currentFrame;
-
-private:
-  i32 m_frames;
-  i32 m_frameSpeedRate;
-  bool m_isLoop;
-  i32 m_startedAt;
+  explicit AnimationComponent(const i32 frames = 1, const i32 frameSpeedRate = 1, const bool isLoop = true)
+      : currentFrame(1), frames(frames), frameSpeedRate(frameSpeedRate), isLoop(isLoop), startedAt(SDL_GetTicks()) {}
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

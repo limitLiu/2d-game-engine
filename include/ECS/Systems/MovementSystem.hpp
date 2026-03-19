@@ -5,7 +5,7 @@
 #include "ECS/Components/RigidBodyComponent.hpp"
 #include "ECS/Components/TransformComponent.hpp"
 
-namespace ECS {
+namespace Engine::ECS {
 struct MovementSystem : public System {
   MovementSystem() {
     requireComponent<TransformComponent>();
@@ -16,11 +16,11 @@ struct MovementSystem : public System {
     for (const auto entity : entities()) {
       auto &transform = entity.component<TransformComponent>();
       const auto &rigidBody = entity.component<RigidBodyComponent>();
-      transform.m_position.x += rigidBody.velocity().x * deltaTime;
-      transform.m_position.y += rigidBody.velocity().y * deltaTime;
+      transform.position.x += rigidBody.velocity.x * deltaTime;
+      transform.position.y += rigidBody.velocity.y * deltaTime;
     }
   }
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

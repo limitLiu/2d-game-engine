@@ -8,7 +8,7 @@
 
 #include <SDL.h>
 
-namespace ECS {
+namespace Engine::ECS {
 struct RenderColliderSystem : public System {
   RenderColliderSystem() {
     requireComponent<BoxColliderComponent>();
@@ -20,16 +20,16 @@ struct RenderColliderSystem : public System {
       const auto transform = entity.component<TransformComponent>();
       const auto collider = entity.component<BoxColliderComponent>();
       SDL_Rect rect = {
-          static_cast<i32>(transform.position().x + collider.offset().x),
-          static_cast<i32>(transform.position().y + collider.offset().y),
-          static_cast<i32>(collider.width()),
-          static_cast<i32>(collider.height()),
+          static_cast<i32>(transform.position.x + collider.offset.x),
+          static_cast<i32>(transform.position.y + collider.offset.y),
+          static_cast<i32>(collider.width),
+          static_cast<i32>(collider.height),
       };
       SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
       SDL_RenderDrawRect(renderer, &rect);
     }
   }
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

@@ -3,7 +3,7 @@
 
 #include "Common.hpp"
 
-namespace ECS {
+namespace Engine::ECS {
 struct Entity {
   explicit Entity(const u32 id) : m_id(id) {}
 
@@ -31,6 +31,6 @@ struct Entity {
 private:
   u32 m_id;
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

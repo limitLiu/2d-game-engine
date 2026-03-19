@@ -5,6 +5,8 @@
 #include "ECS/Base/Component.hpp"
 #include "ECS/Base/Entity.hpp"
 #include "ECS/Base/Pool.hpp"
+
+#include <deque>
 #include <memory>
 #include <set>
 #include <spdlog/spdlog.h>
@@ -13,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace ECS {
+namespace Engine::ECS {
 struct Registry {
   Registry();
 
@@ -136,6 +138,6 @@ template <class T> void Entity::removeComponent() const { m_registry->removeComp
 template <class T> bool Entity::hasComponent() const { return m_registry->hasComponent<T>(*this); }
 
 template <class T> T &Entity::component() const { return m_registry->component<T>(*this); }
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

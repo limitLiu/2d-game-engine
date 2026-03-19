@@ -1,9 +1,9 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-namespace ECS {
+namespace Engine::ECS {
 struct Registry;
-} // namespace ECS
+} // namespace Engine::ECS
 
 typedef struct SDL_Window SDL_Window;
 typedef struct SDL_Renderer SDL_Renderer;

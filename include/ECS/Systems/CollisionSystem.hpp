@@ -6,7 +6,7 @@
 #include "ECS/Components/TransformComponent.hpp"
 #include "spdlog/spdlog.h"
 
-namespace ECS {
+namespace Engine::ECS {
 struct CollisionSystem : public System {
   CollisionSystem() {
     requireComponent<BoxColliderComponent>();
@@ -27,8 +27,8 @@ struct CollisionSystem : public System {
         const auto bTransform = b.component<TransformComponent>();
         const auto bCollider = b.component<BoxColliderComponent>();
         const auto collisionHappened =
-            CheckAABBCollision(aTransform.position().x, aTransform.position().y, aCollider.width(), aCollider.height(),
-                               bTransform.position().x, bTransform.position().y, bCollider.width(), bCollider.height());
+            CheckAABBCollision(aTransform.position.x, aTransform.position.y, aCollider.width, aCollider.height,
+                               bTransform.position.x, bTransform.position.y, bCollider.width, bCollider.height);
         if (collisionHappened) {
           spdlog::info("Entity {} is colliding with entity {}", a.id(), b.id());
           a.kill();
@@ -44,6 +44,6 @@ private:
     return aX < bX + bWidth && aX + aWidth > bX && aY < bY + bHeight && aY + aHeight > bY;
   }
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

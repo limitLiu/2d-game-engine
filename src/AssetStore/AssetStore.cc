@@ -21,7 +21,7 @@ void AssetStore::addTexture(SDL_Renderer *renderer, const std::string &assetID, 
 SDL_Texture *AssetStore::textures(const std::string &assetID) const { return m_textures.at(assetID); }
 
 void AssetStore::clearTextures() {
-  for (auto *texture : m_textures | std::views::values) {
+  for (const auto [_, texture] : m_textures) {
     SDL_DestroyTexture(texture);
   }
   m_textures.clear();

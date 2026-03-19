@@ -1,6 +1,6 @@
 #include "ECS/Base/System.hpp"
 
-using namespace ECS;
+using namespace Engine::ECS;
 
 void System::addEntity(Entity entity) { m_entities.emplace_back(entity); }
 

@@ -4,7 +4,7 @@
 #include "Common.hpp"
 #include <vector>
 
-namespace ECS {
+namespace Engine::ECS {
 class IPool {
 public:
   virtual ~IPool() {}
@@ -14,25 +14,25 @@ template <class T> struct Pool : public IPool {
   explicit Pool(const usize n = 128) { resize(n); }
   virtual ~Pool() = default;
 
-  bool isEmpty() const { return _data.empty(); }
+  bool isEmpty() const { return m_data.empty(); }
 
-  usize size() { return _data.size(); }
+  usize size() { return m_data.size(); }
 
-  void resize(usize n) { _data.resize(n); }
+  void resize(usize n) { m_data.resize(n); }
 
-  void clear() { _data.clear(); }
+  void clear() { m_data.clear(); }
 
-  void add(T element) { _data.emplace_back(element); }
+  void add(T element) { m_data.emplace_back(element); }
 
-  void set(usize index, T value) { _data[index] = value; }
+  void set(usize index, T value) { m_data[index] = value; }
 
-  T &get(usize index) { return _data[index]; }
+  T &get(usize index) { return m_data[index]; }
 
-  T &operator[](usize index) { return _data[index]; }
+  T &operator[](usize index) { return m_data[index]; }
 
 private:
-  std::vector<T> _data;
+  std::vector<T> m_data;
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

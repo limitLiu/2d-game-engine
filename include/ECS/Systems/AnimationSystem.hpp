@@ -5,7 +5,7 @@
 #include "ECS/Components/AnimationComponent.hpp"
 #include "ECS/Components/SpriteComponent.hpp"
 
-namespace ECS {
+namespace Engine::ECS {
 struct AnimationSystem : public System {
   AnimationSystem() {
     requireComponent<SpriteComponent>();
@@ -16,12 +16,12 @@ struct AnimationSystem : public System {
     for (const auto entity : entities()) {
       auto &sprite = entity.component<SpriteComponent>();
       auto &animation = entity.component<AnimationComponent>();
-      animation.m_currentFrame =
-          (SDL_GetTicks() - animation.startedAt()) * animation.frameSpeedRate() / 1000 % animation.frames();
-      sprite.m_srcRect.x = animation.currentFrame() * sprite.width();
+      animation.currentFrame =
+          (SDL_GetTicks() - animation.startedAt) * animation.frameSpeedRate / 1000 % animation.frames;
+      sprite.srcRect.x = animation.currentFrame * sprite.width;
     }
   }
 };
-} // namespace ECS
+} // namespace Engine::ECS
 
 #endif

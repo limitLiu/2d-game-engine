@@ -1,7 +1,7 @@
 #include "ECS/Base/Entity.hpp"
 #include "ECS/Base/Registry.hpp"
 
-using namespace ECS;
+using namespace Engine::ECS;
 
 u32 Entity::id() const { return m_id; }
 
