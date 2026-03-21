@@ -1,5 +1,5 @@
 #include "ECS/Base/Registry.hpp"
-#include "ECS/Base/System.hpp"
+#include "ECS/System/Base.hpp"
 
 #include <ranges>
 

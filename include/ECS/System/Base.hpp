@@ -2,14 +2,14 @@
 #define SYSTEM_HPP
 
 #include "Common.hpp"
-#include "ECS/Base/Component.hpp"
 #include "ECS/Base/Entity.hpp"
+#include "ECS/Component/Base.hpp"
 #include <vector>
 
-namespace Engine::ECS {
-struct System {
-  System() = default;
-  ~System() = default;
+namespace Engine::ECS::System {
+struct Base {
+  Base() = default;
+  ~Base() = default;
 
   void addEntity(Entity entity);
 
@@ -26,10 +26,10 @@ private:
   std::vector<Entity> m_entities;
 };
 
-template <class T> void System::requireComponent() {
-  const auto componentId = Component<T>::GetId();
+template <class T> void Base::requireComponent() {
+  const auto componentId = Engine::ECS::Component::Base<T>::GetId();
   m_componentSignature.set(componentId);
 }
-} // namespace Engine::ECS
+} // namespace Engine::ECS::System
 
 #endif

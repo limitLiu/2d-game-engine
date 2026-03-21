@@ -1,18 +1,20 @@
-#include "ECS/Game.hpp"
+#include "Game.hpp"
 #include "AssetStore/AssetStore.hpp"
-#include "ECS/Base/Entity.hpp"
 #include "ECS/Base/Registry.hpp"
-#include "ECS/Components/AnimationComponent.hpp"
-#include "ECS/Components/BoxColliderComponent.hpp"
-#include "ECS/Components/RigidBodyComponent.hpp"
-#include "ECS/Components/SpriteComponent.hpp"
-#include "ECS/Components/TransformComponent.hpp"
-#include "ECS/Systems/AnimationSystem.hpp"
-#include "ECS/Systems/CollisionSystem.hpp"
-#include "ECS/Systems/MovementSystem.hpp"
-#include "ECS/Systems/RenderColliderSystem.hpp"
-#include "ECS/Systems/RenderSystem.hpp"
+#include "ECS/Component/Animation.hpp"
+#include "ECS/Component/BoxCollider.hpp"
+#include "ECS/Component/RigidBody.hpp"
+#include "ECS/Component/Sprite.hpp"
+#include "ECS/Component/Transform.hpp"
+#include "ECS/System/Animation.hpp"
+#include "ECS/System/Collision.hpp"
+#include "ECS/System/Damage.hpp"
+#include "ECS/System/Movement.hpp"
+#include "ECS/System/Render.hpp"
+#include "ECS/System/RenderCollider.hpp"
+#include "Event/Bus.hpp"
 
+#include <SDL.h>
 #include <cstdlib>
 #include <fstream>
 #include <glm/glm.hpp>
@@ -26,6 +28,7 @@ constexpr i32 HEIGHT = 540;
 Game::Game() {
   m_registry = std::make_unique<ECS::Registry>();
   m_assetStore = std::make_unique<AssetStore>();
+  m_bus = std::make_unique<Event::Bus>();
   spdlog::info("Game constructor called");
 }
 
@@ -72,8 +75,8 @@ void Game::inputEvent() {
 void Game::render() {
   SDL_SetRenderDrawColor(m_ctx, 0, 0, 0, 0);
   SDL_RenderClear(m_ctx);
-  m_registry->system<ECS::RenderSystem>().update(m_ctx, m_assetStore);
-  m_registry->system<ECS::RenderColliderSystem>().update(m_ctx);
+  m_registry->system<ECS::System::Render>().update(m_ctx, m_assetStore);
+  m_registry->system<ECS::System::RenderCollider>().update(m_ctx);
   SDL_RenderPresent(m_ctx);
 }
 
@@ -87,11 +90,12 @@ void Game::run() {
 }
 
 void Game::loadLevel(i32 level) {
-  m_registry->addSystem<ECS::MovementSystem>();
-  m_registry->addSystem<ECS::RenderSystem>();
-  m_registry->addSystem<ECS::AnimationSystem>();
-  m_registry->addSystem<ECS::CollisionSystem>();
-  m_registry->addSystem<ECS::RenderColliderSystem>();
+  m_registry->addSystem<ECS::System::Movement>();
+  m_registry->addSystem<ECS::System::Render>();
+  m_registry->addSystem<ECS::System::Animation>();
+  m_registry->addSystem<ECS::System::Collision>();
+  m_registry->addSystem<ECS::System::RenderCollider>();
+  m_registry->addSystem<ECS::System::Damage>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");
@@ -115,36 +119,36 @@ void Game::loadLevel(i32 level) {
       i32 srcRectX = std::atoi(&ch) * tileSize;
       mapFile.ignore();
       ECS::Entity tile = m_registry->createEntity();
-      tile.addComponent<ECS::TransformComponent>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)),
-                                                 glm::vec2(tileScale, tileScale), 0);
-      tile.addComponent<ECS::SpriteComponent>("jungle", tileSize, tileSize, 0, srcRectX, srcRectY);
+      tile.addComponent<ECS::Component::Transform>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)),
+                                                   glm::vec2(tileScale, tileScale), 0);
+      tile.addComponent<ECS::Component::Sprite>("jungle", tileSize, tileSize, 0, srcRectX, srcRectY);
     }
   }
   mapFile.close();
 
   ECS::Entity tank = m_registry->createEntity();
-  tank.addComponent<ECS::TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
-  tank.addComponent<ECS::RigidBodyComponent>(glm::vec2(10.0, 0.0));
-  tank.addComponent<ECS::SpriteComponent>("tank-panther-right", 32, 32, 1);
-  tank.addComponent<ECS::BoxColliderComponent>(32, 32);
+  tank.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.addComponent<ECS::Component::RigidBody>(glm::vec2(10.0, 0.0));
+  tank.addComponent<ECS::Component::Sprite>("tank-panther-right", 32, 32, 1);
+  tank.addComponent<ECS::Component::BoxCollider>(32, 32);
 
   ECS::Entity truck = m_registry->createEntity();
-  truck.addComponent<ECS::TransformComponent>(glm::vec2(30.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
-  truck.addComponent<ECS::RigidBodyComponent>(glm::vec2(0.0, 0.0));
-  truck.addComponent<ECS::SpriteComponent>("truck-ford-up", 32, 32, 1);
-  truck.addComponent<ECS::BoxColliderComponent>(32, 32);
+  truck.addComponent<ECS::Component::Transform>(glm::vec2(30.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
+  truck.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
+  truck.addComponent<ECS::Component::Sprite>("truck-ford-up", 32, 32, 1);
+  truck.addComponent<ECS::Component::BoxCollider>(32, 32);
 
   ECS::Entity chopper = m_registry->createEntity();
-  chopper.addComponent<ECS::TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-  chopper.addComponent<ECS::RigidBodyComponent>(glm::vec2(20.0, 0.0));
-  chopper.addComponent<ECS::SpriteComponent>("chopper", 32, 32, 1);
-  chopper.addComponent<ECS::AnimationComponent>(2, 12, true);
+  chopper.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+  chopper.addComponent<ECS::Component::RigidBody>(glm::vec2(20.0, 0.0));
+  chopper.addComponent<ECS::Component::Sprite>("chopper", 32, 32, 1);
+  chopper.addComponent<ECS::Component::Animation>(2, 12, true);
 
   ECS::Entity radar = m_registry->createEntity();
-  radar.addComponent<ECS::TransformComponent>(glm::vec2(WIDTH - 64 - 10, 10.0), glm::vec2(1.0, 1.0), 0.0);
-  radar.addComponent<ECS::RigidBodyComponent>(glm::vec2(00.0, 0.0));
-  radar.addComponent<ECS::SpriteComponent>("radar", 64, 64, 2);
-  radar.addComponent<ECS::AnimationComponent>(8, 5, true);
+  radar.addComponent<ECS::Component::Transform>(glm::vec2(WIDTH - 64 - 10, 10.0), glm::vec2(1.0, 1.0), 0.0);
+  radar.addComponent<ECS::Component::RigidBody>(glm::vec2(00.0, 0.0));
+  radar.addComponent<ECS::Component::Sprite>("radar", 64, 64, 2);
+  radar.addComponent<ECS::Component::Animation>(8, 5, true);
 }
 
 void Game::setup() { loadLevel(1); }
@@ -156,10 +160,13 @@ void Game::update() {
   }
   const f64 deltaTime = (SDL_GetTicks() - m_millionSecsPreviousFrame) / 1000.0;
   m_millionSecsPreviousFrame = SDL_GetTicks();
+
+  m_bus->reset();
+  m_registry->system<ECS::System::Damage>().subscribe(m_bus);
   m_registry->update();
-  m_registry->system<ECS::MovementSystem>().update(deltaTime);
-  m_registry->system<ECS::AnimationSystem>().update(deltaTime);
-  m_registry->system<ECS::CollisionSystem>().update();
+  m_registry->system<ECS::System::Movement>().update(deltaTime);
+  m_registry->system<ECS::System::Animation>().update(deltaTime);
+  m_registry->system<ECS::System::Collision>().update(m_bus);
 }
 
 void Game::destroy() {

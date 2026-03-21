@@ -2,9 +2,9 @@
 #define REGISTRY_HPP
 
 #include "Common.hpp"
-#include "ECS/Base/Component.hpp"
-#include "ECS/Base/Entity.hpp"
 #include "ECS/Base/Pool.hpp"
+#include "ECS/Component/Base.hpp"
+#include "Entity.hpp"
 
 #include <deque>
 #include <memory>
@@ -16,6 +16,9 @@
 #include <vector>
 
 namespace Engine::ECS {
+namespace System {
+struct Base;
+} // namespace System
 struct Registry {
   Registry();
 
@@ -47,7 +50,7 @@ struct Registry {
 
   void removeEntityFromSystems(Entity entity) const;
 
-  std::unordered_map<std::type_index, std::shared_ptr<struct System>> systems() const { return m_systems; }
+  std::unordered_map<std::type_index, std::shared_ptr<System::Base>> systems() const { return m_systems; }
 
 private:
   u32 m_entitiesCount = 0;
@@ -56,7 +59,7 @@ private:
 
   std::vector<Signature> m_entityComponentSignatures;
 
-  std::unordered_map<std::type_index, std::shared_ptr<struct System>> m_systems;
+  std::unordered_map<std::type_index, std::shared_ptr<System::Base>> m_systems;
 
   std::set<Entity> m_entities2BeAdded;
 
@@ -66,7 +69,7 @@ private:
 };
 
 template <class T, class... Args> void Registry::addComponent(const Entity entity, Args &&...args) {
-  const auto componentId = Component<T>::GetId();
+  const auto componentId = Component::Base<T>::GetId();
   const auto entityId = entity.id();
 
   if (componentId >= m_componentPools.size()) {
@@ -90,14 +93,14 @@ template <class T, class... Args> void Registry::addComponent(const Entity entit
 }
 
 template <class T> void Registry::removeComponent(const Entity entity) {
-  const auto componentId = Component<T>::GetId();
+  const auto componentId = Component::Base<T>::GetId();
   const auto entityId = entity.id();
   m_entityComponentSignatures[entityId].set(componentId, false);
   spdlog::info("Component id = {} was removed from entity id = {}", componentId, entityId);
 }
 
 template <class T> bool Registry::hasComponent(const Entity entity) const {
-  const auto componentId = Component<T>::GetId();
+  const auto componentId = Component::Base<T>::GetId();
   const auto entityId = entity.id();
   return m_entityComponentSignatures[entityId].test(componentId);
 }
@@ -123,7 +126,7 @@ template <class T> T &Registry::system() const {
 }
 
 template <class T> T &Registry::component(const Entity entity) {
-  const auto componentId = Component<T>::GetId();
+  const auto componentId = Component::Base<T>::GetId();
   const auto entityId = entity.id();
   auto pool = std::static_pointer_cast<Pool<T>>(m_componentPools[componentId]);
   return pool->get(entityId);

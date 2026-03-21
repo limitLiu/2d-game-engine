@@ -1,38 +1,39 @@
 #ifndef COLLISION_SYSTEM_HPP
 #define COLLISION_SYSTEM_HPP
 
-#include "ECS/Base/System.hpp"
-#include "ECS/Components/BoxColliderComponent.hpp"
-#include "ECS/Components/TransformComponent.hpp"
+#include "ECS/Component/BoxCollider.hpp"
+#include "ECS/Component/Transform.hpp"
+#include "ECS/System/Base.hpp"
+#include "Event/Bus.hpp"
+#include "Event/Collision.hpp"
 #include "spdlog/spdlog.h"
 
-namespace Engine::ECS {
-struct CollisionSystem : public System {
-  CollisionSystem() {
-    requireComponent<BoxColliderComponent>();
-    requireComponent<TransformComponent>();
+namespace Engine::ECS::System {
+struct Collision : public Base {
+  Collision() {
+    requireComponent<Component::BoxCollider>();
+    requireComponent<Component::Transform>();
   }
 
-  void update() {
+  void update(const std::unique_ptr<Event::Bus> &eventBus) const {
     const auto elements = entities();
     for (auto i = elements.begin(); i != elements.end(); ++i) {
       Entity a = *i;
-      const auto aTransform = a.component<TransformComponent>();
-      const auto aCollider = a.component<BoxColliderComponent>();
+      const auto aTransform = a.component<Component::Transform>();
+      const auto aCollider = a.component<Component::BoxCollider>();
       for (auto j = i; j != elements.end(); ++j) {
         Entity b = *j;
         if (a == b) {
           continue;
         }
-        const auto bTransform = b.component<TransformComponent>();
-        const auto bCollider = b.component<BoxColliderComponent>();
+        const auto bTransform = b.component<Component::Transform>();
+        const auto bCollider = b.component<Component::BoxCollider>();
         const auto collisionHappened =
             CheckAABBCollision(aTransform.position.x, aTransform.position.y, aCollider.width, aCollider.height,
                                bTransform.position.x, bTransform.position.y, bCollider.width, bCollider.height);
         if (collisionHappened) {
           spdlog::info("Entity {} is colliding with entity {}", a.id(), b.id());
-          a.kill();
-          b.kill();
+          eventBus->emit<Event::Collision>(a, b);
         }
       }
     }
@@ -44,6 +45,6 @@ private:
     return aX < bX + bWidth && aX + aWidth > bX && aY < bY + bHeight && aY + aHeight > bY;
   }
 };
-} // namespace Engine::ECS
+} // namespace Engine::ECS::System
 
 #endif

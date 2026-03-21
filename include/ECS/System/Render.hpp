@@ -2,32 +2,32 @@
 #define RENDER_SYSTEM_HPP
 
 #include "AssetStore/AssetStore.hpp"
-#include "ECS/Base/System.hpp"
-#include "ECS/Components/SpriteComponent.hpp"
-#include "ECS/Components/TransformComponent.hpp"
+#include "ECS/Component/Sprite.hpp"
+#include "ECS/Component/Transform.hpp"
+#include "ECS/System/Base.hpp"
 
 #include <SDL.h>
 #include <algorithm>
 #include <memory>
 #include <vector>
 
-namespace Engine::ECS {
-struct RenderSystem : public System {
-  RenderSystem() {
-    requireComponent<TransformComponent>();
-    requireComponent<SpriteComponent>();
+namespace Engine::ECS::System {
+struct Render : public Base {
+  Render() {
+    requireComponent<Component::Transform>();
+    requireComponent<Component::Sprite>();
   }
 
-  void update(SDL_Renderer *context, std::unique_ptr<Engine::AssetStore> &store) {
+  void update(SDL_Renderer *context, std::unique_ptr<Engine::AssetStore> &store) const {
     struct RenderableEntity {
-      TransformComponent transformComponent;
-      SpriteComponent spriteComponent;
+      Component::Transform transformComponent;
+      Component::Sprite spriteComponent;
     };
     std::vector<RenderableEntity> renderableEntities;
     for (const auto entity : entities()) {
       RenderableEntity e;
-      e.transformComponent = entity.component<TransformComponent>();
-      e.spriteComponent = entity.component<SpriteComponent>();
+      e.transformComponent = entity.component<Component::Transform>();
+      e.spriteComponent = entity.component<Component::Sprite>();
       renderableEntities.emplace_back(e);
     }
 
@@ -47,6 +47,6 @@ struct RenderSystem : public System {
     }
   }
 };
-} // namespace Engine::ECS
+} // namespace Engine::ECS::System
 
 #endif

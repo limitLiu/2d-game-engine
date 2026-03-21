@@ -3,9 +3,10 @@
 
 #include "Common.hpp"
 #include "ECS/Base/Entity.hpp"
+#include "Event/Base.hpp"
 
 namespace Engine::Event {
-struct Collision {
+struct Collision : public Base {
   ECS::Entity a;
   ECS::Entity b;
   Collision(const ECS::Entity a, const ECS::Entity b) : a(a), b(b) {};

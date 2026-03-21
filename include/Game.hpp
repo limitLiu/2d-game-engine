@@ -13,6 +13,10 @@ typedef struct SDL_Renderer SDL_Renderer;
 #include <memory>
 
 namespace Engine {
+namespace Event {
+struct Bus;
+} // namespace Event
+
 constexpr i32 FPS = 60;
 constexpr f32 MILLION_SECS_PER_FRAME = 1000 / FPS;
 
@@ -44,6 +48,7 @@ private:
   i32 m_millionSecsPreviousFrame{0};
   std::unique_ptr<ECS::Registry> m_registry;
   std::unique_ptr<struct AssetStore> m_assetStore;
+  std::unique_ptr<Event::Bus> m_bus;
 };
 } // namespace Engine
 
