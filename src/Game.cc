@@ -3,12 +3,14 @@
 #include "ECS/Base/Registry.hpp"
 #include "ECS/Component/Animation.hpp"
 #include "ECS/Component/BoxCollider.hpp"
+#include "ECS/Component/KeyboardControlled.hpp"
 #include "ECS/Component/RigidBody.hpp"
 #include "ECS/Component/Sprite.hpp"
 #include "ECS/Component/Transform.hpp"
 #include "ECS/System/Animation.hpp"
 #include "ECS/System/Collision.hpp"
 #include "ECS/System/Damage.hpp"
+#include "ECS/System/KeyboardControl.hpp"
 #include "ECS/System/Movement.hpp"
 #include "ECS/System/Render.hpp"
 #include "ECS/System/RenderCollider.hpp"
@@ -65,6 +67,7 @@ void Game::inputEvent() {
       if (event.key.keysym.sym == SDLK_ESCAPE) {
         m_isRunning = false;
       }
+      m_bus->emit<Event::KeyPressed>(event.key.keysym.sym);
       break;
     default:
       break;
@@ -89,19 +92,21 @@ void Game::run() {
   }
 }
 
-void Game::loadLevel(i32 level) {
+void Game::loadLevel(i32 level) const {
   m_registry->addSystem<ECS::System::Movement>();
   m_registry->addSystem<ECS::System::Render>();
   m_registry->addSystem<ECS::System::Animation>();
   m_registry->addSystem<ECS::System::Collision>();
   m_registry->addSystem<ECS::System::RenderCollider>();
   m_registry->addSystem<ECS::System::Damage>();
+  m_registry->addSystem<ECS::System::KeyboardControl>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-down", "assets/images/truck-ford-down.png");
   m_assetStore->addTexture(m_ctx, "jungle", "assets/tilemaps/jungle.png");
-  m_assetStore->addTexture(m_ctx, "chopper", "assets/images/chopper.png");
+  m_assetStore->addTexture(m_ctx, "chopper", "assets/images/chopper-spritesheet.png");
+
   m_assetStore->addTexture(m_ctx, "radar", "assets/images/radar.png");
 
   i32 tileSize = 32;
@@ -140,9 +145,11 @@ void Game::loadLevel(i32 level) {
 
   ECS::Entity chopper = m_registry->createEntity();
   chopper.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-  chopper.addComponent<ECS::Component::RigidBody>(glm::vec2(20.0, 0.0));
-  chopper.addComponent<ECS::Component::Sprite>("chopper", 32, 32, 1);
+  chopper.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
+  chopper.addComponent<ECS::Component::Sprite>("chopper", 32, 32, 1, 0, 32);
   chopper.addComponent<ECS::Component::Animation>(2, 12, true);
+  chopper.addComponent<ECS::Component::KeyboardControlled>(glm::vec2(0, -20), glm::vec2(20, 0), glm::vec2(0, 20),
+                                                           glm::vec2(-20, 0));
 
   ECS::Entity radar = m_registry->createEntity();
   radar.addComponent<ECS::Component::Transform>(glm::vec2(WIDTH - 64 - 10, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -151,7 +158,7 @@ void Game::loadLevel(i32 level) {
   radar.addComponent<ECS::Component::Animation>(8, 5, true);
 }
 
-void Game::setup() { loadLevel(1); }
+void Game::setup() const { loadLevel(1); }
 
 void Game::update() {
   if (const auto wait = MILLION_SECS_PER_FRAME - SDL_GetTicks() + m_millionSecsPreviousFrame;
@@ -163,6 +170,7 @@ void Game::update() {
 
   m_bus->reset();
   m_registry->system<ECS::System::Damage>().subscribe(m_bus);
+  m_registry->system<ECS::System::KeyboardControl>().subscribe(m_bus);
   m_registry->update();
   m_registry->system<ECS::System::Movement>().update(deltaTime);
   m_registry->system<ECS::System::Animation>().update(deltaTime);

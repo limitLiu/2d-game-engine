@@ -37,9 +37,9 @@ struct Game {
 
   void render();
 
-  void loadLevel(i32 level);
+  void loadLevel(i32 level) const;
 
-  void setup();
+  void setup() const;
 
 private:
   SDL_Window *m_window{nullptr};

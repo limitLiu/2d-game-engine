@@ -14,7 +14,7 @@ struct Damage : public Base {
     eventBus->subscribe<Event::Collision>(this, &Damage::onCollision);
   }
 
-  void onCollision(Event::Collision &event) {
+  void onCollision(const Event::Collision &event) {
     event.a.kill();
     event.b.kill();
   }
