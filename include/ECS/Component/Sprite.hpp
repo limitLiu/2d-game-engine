@@ -7,15 +7,17 @@
 
 namespace Engine::ECS::Component {
 struct Sprite {
-  SDL_Rect srcRect;
+  std::string assetID;
   i32 width;
   i32 height;
-  std::string assetID;
   i32 zIndex;
+  bool isFixed;
+  SDL_Rect srcRect;
 
   explicit Sprite(const std::string &textureID = "", const i32 width = 0, const i32 height = 0, const i32 zIndex = 0,
-                  const i32 srcRectX = 0, const i32 srcRectY = 0)
-      : srcRect{srcRectX, srcRectY, width, height}, width(width), height(height), assetID(textureID), zIndex(zIndex) {}
+                  const bool isFixed = false, const i32 srcRectX = 0, const i32 srcRectY = 0)
+      : assetID(textureID), width(width), height(height), zIndex(zIndex), isFixed(isFixed),
+        srcRect{srcRectX, srcRectY, width, height} {}
 };
 } // namespace Engine::ECS::Component
 

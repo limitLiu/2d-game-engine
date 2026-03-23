@@ -18,7 +18,7 @@ struct Render : public Base {
     requireComponent<Component::Sprite>();
   }
 
-  void update(SDL_Renderer *context, std::unique_ptr<Engine::AssetStore> &store) const {
+  void update(SDL_Renderer *context, std::unique_ptr<Engine::AssetStore> &store, SDL_Rect &camera) const {
     struct RenderableEntity {
       Component::Transform transformComponent;
       Component::Sprite spriteComponent;
@@ -39,10 +39,11 @@ struct Render : public Base {
     for (const auto [transformComponent, spriteComponent] : renderableEntities) {
       auto *texture = store->textures(spriteComponent.assetID);
       const auto srcRect = spriteComponent.srcRect;
-      const SDL_Rect dstRect = {static_cast<i32>(transformComponent.position.x),
-                                static_cast<i32>(transformComponent.position.y),
-                                static_cast<i32>(spriteComponent.width * transformComponent.scale.x),
-                                static_cast<i32>(spriteComponent.height * transformComponent.scale.y)};
+      const SDL_Rect dstRect = {
+          static_cast<i32>(transformComponent.position.x - (spriteComponent.isFixed ? 0 : camera.x)),
+          static_cast<i32>(transformComponent.position.y - (spriteComponent.isFixed ? 0 : camera.y)),
+          static_cast<i32>(spriteComponent.width * transformComponent.scale.x),
+          static_cast<i32>(spriteComponent.height * transformComponent.scale.y)};
       SDL_RenderCopyEx(context, texture, &srcRect, &dstRect, transformComponent.rotation, nullptr, SDL_FLIP_NONE);
     }
   }

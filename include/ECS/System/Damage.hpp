@@ -15,6 +15,7 @@ struct Damage : public Base {
   }
 
   void onCollision(const Event::Collision &event) {
+    spdlog::info("Entity {} collied with entity {}", event.a.id(), event.b.id());
     event.a.kill();
     event.b.kill();
   }

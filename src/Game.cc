@@ -3,20 +3,23 @@
 #include "ECS/Base/Registry.hpp"
 #include "ECS/Component/Animation.hpp"
 #include "ECS/Component/BoxCollider.hpp"
+#include "ECS/Component/CameraFollow.hpp"
+#include "ECS/Component/Health.hpp"
 #include "ECS/Component/KeyboardControlled.hpp"
 #include "ECS/Component/RigidBody.hpp"
 #include "ECS/Component/Sprite.hpp"
 #include "ECS/Component/Transform.hpp"
 #include "ECS/System/Animation.hpp"
+#include "ECS/System/CameraMovement.hpp"
 #include "ECS/System/Collision.hpp"
 #include "ECS/System/Damage.hpp"
 #include "ECS/System/KeyboardControl.hpp"
 #include "ECS/System/Movement.hpp"
+#include "ECS/System/ProjectileEmitter.hpp"
 #include "ECS/System/Render.hpp"
 #include "ECS/System/RenderCollider.hpp"
 #include "Event/Bus.hpp"
 
-#include <SDL.h>
 #include <cstdlib>
 #include <fstream>
 #include <glm/glm.hpp>
@@ -24,13 +27,16 @@
 
 using namespace Engine;
 
-constexpr i32 WIDTH = 960;
-constexpr i32 HEIGHT = 540;
+i32 Game::s_width = 960;
+i32 Game::s_height = 540;
+i32 Game::s_mapWidth;
+i32 Game::s_mapHeight;
 
 Game::Game() {
   m_registry = std::make_unique<ECS::Registry>();
   m_assetStore = std::make_unique<AssetStore>();
   m_bus = std::make_unique<Event::Bus>();
+  m_camera = {0, 0, s_width, s_height};
   spdlog::info("Game constructor called");
 }
 
@@ -41,7 +47,7 @@ void Game::initialize() {
     spdlog::error("SDL Error: {}", SDL_GetError());
     return;
   }
-  m_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT,
+  m_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_width, s_height,
                               SDL_WINDOW_BORDERLESS);
   if (m_window == nullptr) {
     spdlog::error("Failed to create SDL Window.");
@@ -78,8 +84,8 @@ void Game::inputEvent() {
 void Game::render() {
   SDL_SetRenderDrawColor(m_ctx, 0, 0, 0, 0);
   SDL_RenderClear(m_ctx);
-  m_registry->system<ECS::System::Render>().update(m_ctx, m_assetStore);
-  m_registry->system<ECS::System::RenderCollider>().update(m_ctx);
+  m_registry->system<ECS::System::Render>().update(m_ctx, m_assetStore, m_camera);
+  m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
   SDL_RenderPresent(m_ctx);
 }
 
@@ -100,6 +106,8 @@ void Game::loadLevel(i32 level) const {
   m_registry->addSystem<ECS::System::RenderCollider>();
   m_registry->addSystem<ECS::System::Damage>();
   m_registry->addSystem<ECS::System::KeyboardControl>();
+  m_registry->addSystem<ECS::System::CameraMovement>();
+  m_registry->addSystem<ECS::System::ProjectileEmitter>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");
@@ -108,15 +116,16 @@ void Game::loadLevel(i32 level) const {
   m_assetStore->addTexture(m_ctx, "chopper", "assets/images/chopper-spritesheet.png");
 
   m_assetStore->addTexture(m_ctx, "radar", "assets/images/radar.png");
+  m_assetStore->addTexture(m_ctx, "bullet", "assets/images/bullet.png");
 
   i32 tileSize = 32;
   constexpr i32 mapNumRows = 20;
+  constexpr i32 mapNumCols = 25;
+  constexpr f64 tileScale = 2.0;
   std::fstream mapFile;
   mapFile.open("assets/tilemaps/jungle.map");
   for (i32 y = 0; y < mapNumRows; ++y) {
-    constexpr i32 mapNumCols = 25;
     for (i32 x = 0; x < mapNumCols; ++x) {
-      constexpr f64 tileScale = 2.0;
       char ch;
       mapFile.get(ch);
       i32 srcRectY = std::atoi(&ch) * tileSize;
@@ -126,35 +135,43 @@ void Game::loadLevel(i32 level) const {
       ECS::Entity tile = m_registry->createEntity();
       tile.addComponent<ECS::Component::Transform>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)),
                                                    glm::vec2(tileScale, tileScale), 0);
-      tile.addComponent<ECS::Component::Sprite>("jungle", tileSize, tileSize, 0, srcRectX, srcRectY);
+      tile.addComponent<ECS::Component::Sprite>("jungle", tileSize, tileSize, 0, false, srcRectX, srcRectY);
     }
   }
   mapFile.close();
+  s_mapWidth = mapNumCols * tileSize * tileScale;
+  s_mapHeight = mapNumRows * tileSize * tileScale;
 
   ECS::Entity tank = m_registry->createEntity();
-  tank.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
   tank.addComponent<ECS::Component::RigidBody>(glm::vec2(10.0, 0.0));
   tank.addComponent<ECS::Component::Sprite>("tank-panther-right", 32, 32, 1);
   tank.addComponent<ECS::Component::BoxCollider>(32, 32);
+  tank.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(100.0, 0), 2000, 0, false);
+  tank.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity truck = m_registry->createEntity();
-  truck.addComponent<ECS::Component::Transform>(glm::vec2(30.0, 20.0), glm::vec2(1.0, 1.0), 0.0);
+  truck.addComponent<ECS::Component::Transform>(glm::vec2(30.0, 60.0), glm::vec2(1.0, 1.0), 0.0);
   truck.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
   truck.addComponent<ECS::Component::Sprite>("truck-ford-up", 32, 32, 1);
   truck.addComponent<ECS::Component::BoxCollider>(32, 32);
+  truck.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(0.0, 100.0), 2000, 0, false);
+  truck.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity chopper = m_registry->createEntity();
   chopper.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
   chopper.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
-  chopper.addComponent<ECS::Component::Sprite>("chopper", 32, 32, 1, 0, 32);
+  chopper.addComponent<ECS::Component::Sprite>("chopper", 32, 32, 1, false, 0, 32);
   chopper.addComponent<ECS::Component::Animation>(2, 12, true);
-  chopper.addComponent<ECS::Component::KeyboardControlled>(glm::vec2(0, -20), glm::vec2(20, 0), glm::vec2(0, 20),
-                                                           glm::vec2(-20, 0));
+  chopper.addComponent<ECS::Component::KeyboardControlled>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80),
+                                                           glm::vec2(-80, 0));
+  chopper.addComponent<ECS::Component::CameraFollow>();
+  chopper.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity radar = m_registry->createEntity();
-  radar.addComponent<ECS::Component::Transform>(glm::vec2(WIDTH - 64 - 10, 10.0), glm::vec2(1.0, 1.0), 0.0);
+  radar.addComponent<ECS::Component::Transform>(glm::vec2(s_width - 64 - 10, 10.0), glm::vec2(1.0, 1.0), 0.0);
   radar.addComponent<ECS::Component::RigidBody>(glm::vec2(00.0, 0.0));
-  radar.addComponent<ECS::Component::Sprite>("radar", 64, 64, 2);
+  radar.addComponent<ECS::Component::Sprite>("radar", 64, 64, 2, true);
   radar.addComponent<ECS::Component::Animation>(8, 5, true);
 }
 
@@ -175,9 +192,11 @@ void Game::update() {
   m_registry->system<ECS::System::Movement>().update(deltaTime);
   m_registry->system<ECS::System::Animation>().update(deltaTime);
   m_registry->system<ECS::System::Collision>().update(m_bus);
+  m_registry->system<ECS::System::ProjectileEmitter>().update(m_registry);
+  m_registry->system<ECS::System::CameraMovement>().update(m_camera);
 }
 
-void Game::destroy() {
+void Game::destroy() const {
   SDL_DestroyRenderer(m_ctx);
   SDL_DestroyWindow(m_window);
   SDL_Quit();
