@@ -2,6 +2,7 @@
 #define PROJECTILE_EMITTER_SYSTEM_HPP
 
 #include "ECS/Component/BoxCollider.hpp"
+#include "ECS/Component/Projectile.hpp"
 #include "ECS/Component/ProjectileEmitter.hpp"
 #include "ECS/Component/RigidBody.hpp"
 #include "ECS/Component/Sprite.hpp"
@@ -19,7 +20,7 @@ struct ProjectileEmitter : public Base {
 
   void update(const std::unique_ptr<Registry> &registry) const {
     for (const auto entity : entities()) {
-      auto &transform = entity.component<Component::Transform>();
+      const auto &transform = entity.component<Component::Transform>();
       if (auto &projectileEmitter = entity.component<Component::ProjectileEmitter>();
           SDL_GetTicks() - projectileEmitter.lastEmissionTime > projectileEmitter.repeatFrequency) {
         Entity projectile = registry->createEntity();
@@ -33,6 +34,8 @@ struct ProjectileEmitter : public Base {
         projectile.addComponent<ECS::Component::RigidBody>(projectileEmitter.velocity);
         projectile.addComponent<ECS::Component::Sprite>("bullet", 4, 4, 4);
         projectile.addComponent<ECS::Component::BoxCollider>(4, 4);
+        projectile.addComponent<ECS::Component::Projectile>(
+            projectileEmitter.isFriendly, projectileEmitter.hitPercentDamage, projectileEmitter.duration);
         projectileEmitter.lastEmissionTime = SDL_GetTicks();
       }
     }

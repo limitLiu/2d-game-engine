@@ -16,6 +16,7 @@
 #include "ECS/System/KeyboardControl.hpp"
 #include "ECS/System/Movement.hpp"
 #include "ECS/System/ProjectileEmitter.hpp"
+#include "ECS/System/ProjectileLifecycle.hpp"
 #include "ECS/System/Render.hpp"
 #include "ECS/System/RenderCollider.hpp"
 #include "Event/Bus.hpp"
@@ -108,6 +109,7 @@ void Game::loadLevel(i32 level) const {
   m_registry->addSystem<ECS::System::KeyboardControl>();
   m_registry->addSystem<ECS::System::CameraMovement>();
   m_registry->addSystem<ECS::System::ProjectileEmitter>();
+  m_registry->addSystem<ECS::System::ProjectileLifecycle>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");
@@ -147,7 +149,7 @@ void Game::loadLevel(i32 level) const {
   tank.addComponent<ECS::Component::RigidBody>(glm::vec2(10.0, 0.0));
   tank.addComponent<ECS::Component::Sprite>("tank-panther-right", 32, 32, 1);
   tank.addComponent<ECS::Component::BoxCollider>(32, 32);
-  tank.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(100.0, 0), 2000, 0, false);
+  tank.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(100.0, 0), 5000, 3000, 10, false);
   tank.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity truck = m_registry->createEntity();
@@ -155,7 +157,7 @@ void Game::loadLevel(i32 level) const {
   truck.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
   truck.addComponent<ECS::Component::Sprite>("truck-ford-up", 32, 32, 1);
   truck.addComponent<ECS::Component::BoxCollider>(32, 32);
-  truck.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(0.0, 100.0), 2000, 0, false);
+  truck.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(0.0, 100.0), 5000, 3000, 10, false);
   truck.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity chopper = m_registry->createEntity();
@@ -194,6 +196,7 @@ void Game::update() {
   m_registry->system<ECS::System::Collision>().update(m_bus);
   m_registry->system<ECS::System::ProjectileEmitter>().update(m_registry);
   m_registry->system<ECS::System::CameraMovement>().update(m_camera);
+  m_registry->system<ECS::System::ProjectileLifecycle>().update();
 }
 
 void Game::destroy() const {
