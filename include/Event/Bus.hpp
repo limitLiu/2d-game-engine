@@ -20,7 +20,7 @@ private:
 };
 
 template <class Owner, class T> struct EventCallback : public IEventCallback {
-  using Callback = void (Owner::*)(const T &);
+  using Callback = void (Owner::*)(const T &) const;
 
   EventCallback(Owner *owner, const Callback callback) : owner{owner}, callback{callback} {}
 
@@ -41,7 +41,7 @@ struct Bus {
 
   ~Bus();
 
-  template <class T, class Owner> void subscribe(Owner *owner, void (Owner::*callback)(const T &)) {
+  template <class T, class Owner> void subscribe(Owner *owner, void (Owner::*callback)(const T &) const) {
     if (m_subscribers[typeid(T)].get() == nullptr) {
       m_subscribers[typeid(T)] = std::make_unique<HandlerList>();
     }

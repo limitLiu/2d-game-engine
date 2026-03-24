@@ -7,7 +7,7 @@ namespace Engine::ECS {
 struct Entity {
   explicit Entity(const u32 id) : m_id(id) {}
 
-  struct Registry *m_registry{nullptr};
+  struct Registry *registry{nullptr};
 
   u32 id() const;
 

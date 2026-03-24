@@ -1,10 +1,12 @@
 #ifndef KEYBOARD_CONTROL_SYSTEM_HPP
 #define KEYBOARD_CONTROL_SYSTEM_HPP
 
+#include "ECS/Component/KeyboardControlled.hpp"
+#include "ECS/Component/RigidBody.hpp"
+#include "ECS/Component/Sprite.hpp"
 #include "ECS/System/Base.hpp"
 #include "Event/Bus.hpp"
 #include "Event/Keypressed.hpp"
-#include <string>
 
 namespace Engine::ECS::System {
 struct KeyboardControl : public Base {
@@ -18,7 +20,7 @@ struct KeyboardControl : public Base {
     eventBus->subscribe<Event::KeyPressed>(this, &KeyboardControl::onKeyPressed);
   }
 
-  void onKeyPressed(const Event::KeyPressed &event) {
+  void onKeyPressed(const Event::KeyPressed &event) const {
     for (auto entity : entities()) {
       const auto &keyboardControl = entity.component<Component::KeyboardControlled>();
       auto &sprite = entity.component<Component::Sprite>();

@@ -22,7 +22,7 @@ Entity Registry::createEntity() {
   }
 
   Entity entity(entityId);
-  entity.m_registry = this;
+  entity.registry = this;
   m_entities2BeAdded.insert(entity);
   spdlog::info("Entity created with id = {}", std::to_string(entityId));
   return entity;

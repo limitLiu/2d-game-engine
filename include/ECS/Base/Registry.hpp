@@ -133,14 +133,14 @@ template <class T> T &Registry::component(const Entity entity) {
 }
 
 template <class T, class... Args> void Entity::addComponent(Args &&...args) {
-  m_registry->addComponent<T>(*this, std::forward<Args>(args)...);
+  registry->addComponent<T>(*this, std::forward<Args>(args)...);
 }
 
-template <class T> void Entity::removeComponent() const { m_registry->removeComponent<T>(*this); }
+template <class T> void Entity::removeComponent() const { registry->removeComponent<T>(*this); }
 
-template <class T> bool Entity::hasComponent() const { return m_registry->hasComponent<T>(*this); }
+template <class T> bool Entity::hasComponent() const { return registry->hasComponent<T>(*this); }
 
-template <class T> T &Entity::component() const { return m_registry->component<T>(*this); }
+template <class T> T &Entity::component() const { return registry->component<T>(*this); }
 } // namespace Engine::ECS
 
 #endif

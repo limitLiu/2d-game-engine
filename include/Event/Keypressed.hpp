@@ -3,6 +3,8 @@
 
 #include "Event/Base.hpp"
 
+#include <SDL.h>
+
 namespace Engine::Event {
 struct KeyPressed : public Base {
   SDL_Keycode symbol;

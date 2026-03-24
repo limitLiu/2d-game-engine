@@ -14,7 +14,7 @@ struct Damage : public Base {
     eventBus->subscribe<Event::Collision>(this, &Damage::onCollision);
   }
 
-  void onCollision(const Event::Collision &event) {
+  void onCollision(const Event::Collision &event) const {
     spdlog::info("Entity {} collied with entity {}", event.a.id(), event.b.id());
     // event.a.kill();
     // event.b.kill();

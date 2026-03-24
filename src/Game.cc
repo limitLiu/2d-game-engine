@@ -6,6 +6,7 @@
 #include "ECS/Component/CameraFollow.hpp"
 #include "ECS/Component/Health.hpp"
 #include "ECS/Component/KeyboardControlled.hpp"
+#include "ECS/Component/ProjectileEmitter.hpp"
 #include "ECS/Component/RigidBody.hpp"
 #include "ECS/Component/Sprite.hpp"
 #include "ECS/Component/Transform.hpp"
@@ -20,6 +21,7 @@
 #include "ECS/System/Render.hpp"
 #include "ECS/System/RenderCollider.hpp"
 #include "Event/Bus.hpp"
+#include "Event/Keypressed.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -169,6 +171,7 @@ void Game::loadLevel(i32 level) const {
                                                            glm::vec2(-80, 0));
   chopper.addComponent<ECS::Component::CameraFollow>();
   chopper.addComponent<ECS::Component::Health>(100);
+  chopper.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(150.0, 150.0), 0, 10000, 0, true);
 
   ECS::Entity radar = m_registry->createEntity();
   radar.addComponent<ECS::Component::Transform>(glm::vec2(s_width - 64 - 10, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -190,6 +193,7 @@ void Game::update() {
   m_bus->reset();
   m_registry->system<ECS::System::Damage>().subscribe(m_bus);
   m_registry->system<ECS::System::KeyboardControl>().subscribe(m_bus);
+  m_registry->system<ECS::System::ProjectileEmitter>().subscribe(m_bus);
   m_registry->update();
   m_registry->system<ECS::System::Movement>().update(deltaTime);
   m_registry->system<ECS::System::Animation>().update(deltaTime);
