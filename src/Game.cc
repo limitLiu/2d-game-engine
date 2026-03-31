@@ -137,6 +137,7 @@ void Game::loadLevel(i32 level) const {
       i32 srcRectX = std::atoi(&ch) * tileSize;
       mapFile.ignore();
       ECS::Entity tile = m_registry->createEntity();
+      tile.setGroup("tiles");
       tile.addComponent<ECS::Component::Transform>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)),
                                                    glm::vec2(tileScale, tileScale), 0);
       tile.addComponent<ECS::Component::Sprite>("jungle", tileSize, tileSize, 0, false, srcRectX, srcRectY);
@@ -147,6 +148,7 @@ void Game::loadLevel(i32 level) const {
   s_mapHeight = mapNumRows * tileSize * tileScale;
 
   ECS::Entity tank = m_registry->createEntity();
+  tank.setGroup("enemies");
   tank.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
   tank.addComponent<ECS::Component::RigidBody>(glm::vec2(10.0, 0.0));
   tank.addComponent<ECS::Component::Sprite>("tank-panther-right", 32, 32, 1);
@@ -155,23 +157,26 @@ void Game::loadLevel(i32 level) const {
   tank.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity truck = m_registry->createEntity();
+  truck.setGroup("enemies");
   truck.addComponent<ECS::Component::Transform>(glm::vec2(30.0, 60.0), glm::vec2(1.0, 1.0), 0.0);
   truck.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
   truck.addComponent<ECS::Component::Sprite>("truck-ford-up", 32, 32, 1);
   truck.addComponent<ECS::Component::BoxCollider>(32, 32);
-  truck.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(0.0, 100.0), 5000, 3000, 10, false);
+  truck.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(0.0, 100.0), 2000, 5000, 10, false);
   truck.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity chopper = m_registry->createEntity();
+  chopper.setTag("player");
   chopper.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+  chopper.addComponent<ECS::Component::BoxCollider>(32.0, 32.0);
   chopper.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
   chopper.addComponent<ECS::Component::Sprite>("chopper", 32, 32, 1, false, 0, 32);
   chopper.addComponent<ECS::Component::Animation>(2, 12, true);
   chopper.addComponent<ECS::Component::KeyboardControlled>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80),
                                                            glm::vec2(-80, 0));
   chopper.addComponent<ECS::Component::CameraFollow>();
+  chopper.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(150.0, 150.0), 0, 10000, 10, true);
   chopper.addComponent<ECS::Component::Health>(100);
-  chopper.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(150.0, 150.0), 0, 10000, 0, true);
 
   ECS::Entity radar = m_registry->createEntity();
   radar.addComponent<ECS::Component::Transform>(glm::vec2(s_width - 64 - 10, 10.0), glm::vec2(1.0, 1.0), 0.0);

@@ -1,5 +1,5 @@
-#ifndef SYSTEM_HPP
-#define SYSTEM_HPP
+#ifndef SYSTEM_BASE_HPP
+#define SYSTEM_BASE_HPP
 
 #include "Common.hpp"
 #include "ECS/Base/Entity.hpp"

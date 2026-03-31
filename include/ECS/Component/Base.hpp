@@ -1,5 +1,5 @@
-#ifndef COMPONENT_HPP
-#define COMPONENT_HPP
+#ifndef COMPONENT_BASE_HPP
+#define COMPONENT_BASE_HPP
 
 #include "Common.hpp"
 

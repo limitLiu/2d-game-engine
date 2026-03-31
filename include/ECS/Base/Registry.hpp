@@ -52,6 +52,22 @@ struct Registry {
 
   std::unordered_map<std::type_index, std::shared_ptr<System::Base>> systems() const { return m_systems; }
 
+  void setEntityTag(Entity entity, const std::string &tag);
+
+  bool hasEntityTag(Entity entity, const std::string &tag) const;
+
+  Entity entityFromTag(const std::string &tag) const;
+
+  void removeEntityTag(Entity entity);
+
+  void setEntityGroup(Entity entity, const std::string &group);
+
+  bool entityHasGroup(Entity entity, const std::string &group) const;
+
+  std::vector<Entity> entityFromGroup(const std::string &group) const;
+
+  void removeEntityGroup(Entity entity);
+
 private:
   u32 m_entitiesCount = 0;
 
@@ -66,6 +82,14 @@ private:
   std::set<Entity> m_entities2BeKilled;
 
   std::deque<i32> m_freeIDs;
+
+  std::unordered_map<std::string, Entity> m_entityPerTag;
+
+  std::unordered_map<i32, std::string> m_tagPerEntity;
+
+  std::unordered_map<std::string, std::set<Entity>> m_entitiesPerGroup;
+
+  std::unordered_map<i32, std::string> m_groupPerEntities;
 };
 
 template <class T, class... Args> void Registry::addComponent(const Entity entity, Args &&...args) {

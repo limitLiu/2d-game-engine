@@ -1,5 +1,5 @@
-#ifndef BASE_HPP
-#define BASE_HPP
+#ifndef EVENT_BASE_HPP
+#define EVENT_BASE_HPP
 
 namespace Engine::Event {
 struct Base {

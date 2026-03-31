@@ -34,10 +34,10 @@ struct ProjectileEmitter : public Base {
         if (entity.hasComponent<Component::CameraFollow>()) {
           auto &projectileEmitter = entity.component<Component::ProjectileEmitter>();
           const auto &transform = entity.component<Component::Transform>();
-          auto &rigidBody = entity.component<Component::RigidBody>();
+          const auto &rigidBody = entity.component<Component::RigidBody>();
           auto projectilePosition = transform.position;
           if (entity.hasComponent<ECS::Component::Sprite>()) {
-            auto &sprite = entity.component<ECS::Component::Sprite>();
+            const auto &sprite = entity.component<ECS::Component::Sprite>();
             projectilePosition.x += transform.scale.x * sprite.width * 0.5;
             projectilePosition.y += transform.scale.y * sprite.height * 0.5;
           }
@@ -60,6 +60,7 @@ struct ProjectileEmitter : public Base {
           velocity.y = projectileEmitter.velocity.y * directionY;
 
           Entity projectile = entity.registry->createEntity();
+          projectile.setGroup("projectiles");
           projectile.addComponent<ECS::Component::Transform>(projectilePosition, glm::vec2(1.0, 1.0));
           projectile.addComponent<ECS::Component::RigidBody>(velocity);
           projectile.addComponent<ECS::Component::Sprite>("bullet", 4, 4, 4);
@@ -80,9 +81,10 @@ struct ProjectileEmitter : public Base {
       }
       if (SDL_GetTicks() - projectileEmitter.lastEmissionTime > projectileEmitter.repeatFrequency) {
         Entity projectile = registry->createEntity();
+        projectile.setGroup("projectiles");
         auto projectilePosition = transform.position;
         if (entity.hasComponent<ECS::Component::Sprite>()) {
-          auto &sprite = entity.component<ECS::Component::Sprite>();
+          const auto &sprite = entity.component<ECS::Component::Sprite>();
           projectilePosition.x += transform.scale.x * sprite.width * 0.5;
           projectilePosition.y += transform.scale.y * sprite.height * 0.5;
         }

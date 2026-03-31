@@ -1,7 +1,7 @@
 #include "ECS/Base/Registry.hpp"
 #include "ECS/System/Base.hpp"
 
-#include <ranges>
+#include <spdlog/spdlog.h>
 
 using namespace Engine::ECS;
 
@@ -47,6 +47,55 @@ void Registry::removeEntityFromSystems(const Entity entity) const {
     snd->removeEntity(entity);
   }
 }
+void Registry::setEntityTag(Entity entity, const std::string &tag) {
+  m_entityPerTag.emplace(tag, entity);
+  m_tagPerEntity.emplace(entity.id(), tag);
+}
+
+bool Registry::hasEntityTag(const Entity entity, const std::string &tag) const {
+  if (!m_tagPerEntity.contains(entity.id())) {
+    return false;
+  }
+  return m_entityPerTag.find(tag)->second == entity;
+}
+
+Entity Registry::entityFromTag(const std::string &tag) const { return m_entityPerTag.at(tag); }
+
+void Registry::removeEntityTag(const Entity entity) {
+  if (const auto taggedEntity = m_tagPerEntity.find(entity.id()); taggedEntity != m_tagPerEntity.end()) {
+    m_entityPerTag.erase(taggedEntity->second);
+    m_tagPerEntity.erase(taggedEntity);
+  }
+}
+
+void Registry::setEntityGroup(Entity entity, const std::string &group) {
+  m_entitiesPerGroup.emplace(group, std::set<Entity>());
+  m_entitiesPerGroup[group].emplace(entity);
+  m_groupPerEntities.emplace(entity.id(), group);
+}
+
+bool Registry::entityHasGroup(const Entity entity, const std::string &group) const {
+  if (m_entitiesPerGroup.contains(group)) {
+    return m_entitiesPerGroup.at(group).contains(entity);
+  }
+  return false;
+}
+
+std::vector<Entity> Registry::entityFromGroup(const std::string &group) const {
+  const auto &entitiesFromGroup = m_entitiesPerGroup.at(group);
+  return std::vector(entitiesFromGroup.begin(), entitiesFromGroup.end());
+}
+
+void Registry::removeEntityGroup(const Entity entity) {
+  if (const auto groupedEntities = m_groupPerEntities.find(entity.id()); groupedEntities != m_groupPerEntities.end()) {
+    if (const auto group = m_entitiesPerGroup.find(groupedEntities->second); group != m_entitiesPerGroup.end()) {
+      if (const auto entityInGroup = group->second.find(entity); entityInGroup != group->second.end()) {
+        group->second.erase(entityInGroup);
+      }
+    }
+    m_groupPerEntities.erase(groupedEntities);
+  }
+}
 
 void Registry::update() {
   for (const auto entity : m_entities2BeAdded) {
@@ -57,6 +106,8 @@ void Registry::update() {
     removeEntityFromSystems(entity);
     m_entityComponentSignatures[entity.id()].reset();
     m_freeIDs.emplace_back(entity.id());
+    removeEntityTag(entity);
+    removeEntityGroup(entity);
   }
   m_entities2BeKilled.clear();
 }

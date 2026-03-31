@@ -20,6 +20,14 @@ struct Entity {
   bool operator>=(const Entity &rhs) const;
   bool operator<=(const Entity &rhs) const;
 
+  void setTag(const std::string &tag) const;
+
+  bool hasTag(const std::string &tag) const;
+
+  void setGroup(const std::string &group) const;
+
+  bool belongsToGroup(const std::string &group) const;
+
   template <class T, class... Args> void addComponent(Args &&...args);
 
   template <class T> void removeComponent() const;

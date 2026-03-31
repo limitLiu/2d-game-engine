@@ -6,7 +6,7 @@
 #include "ECS/System/Base.hpp"
 #include "Event/Bus.hpp"
 #include "Event/Collision.hpp"
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 namespace Engine::ECS::System {
 struct Collision : public Base {
