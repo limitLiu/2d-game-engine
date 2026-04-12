@@ -9,7 +9,7 @@ struct Entity {
 
   struct Registry *registry{nullptr};
 
-  u32 id() const;
+  usize id() const;
 
   void kill() const;
 
@@ -37,7 +37,7 @@ struct Entity {
   template <class T> T &component() const;
 
 private:
-  u32 m_id;
+  usize m_id;
 };
 } // namespace Engine::ECS
 

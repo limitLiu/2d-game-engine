@@ -105,6 +105,13 @@ void Registry::update() {
   for (const auto entity : m_entities2BeKilled) {
     removeEntityFromSystems(entity);
     m_entityComponentSignatures[entity.id()].reset();
+
+    for (auto pool : m_componentPools) {
+      if (pool) {
+        pool->removeEntityId(entity.id());
+      }
+    }
+
     m_freeIDs.emplace_back(entity.id());
     removeEntityTag(entity);
     removeEntityGroup(entity);

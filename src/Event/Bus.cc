@@ -1,6 +1,6 @@
 #include "Event/Bus.hpp"
 
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 using namespace Engine;
 

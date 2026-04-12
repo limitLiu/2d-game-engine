@@ -3,7 +3,7 @@
 
 using namespace Engine::ECS;
 
-u32 Entity::id() const { return m_id; }
+usize Entity::id() const { return m_id; }
 
 void Entity::kill() const { registry->killEntity(*this); }
 

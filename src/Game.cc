@@ -62,6 +62,7 @@ void Game::initialize() {
     return;
   }
   SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
+  SDL_RenderSetLogicalSize(m_ctx, s_width, s_height);
   m_isRunning = true;
 }
 

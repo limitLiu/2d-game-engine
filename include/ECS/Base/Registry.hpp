@@ -107,9 +107,6 @@ template <class T, class... Args> void Registry::addComponent(const Entity entit
 
   std::shared_ptr<Pool<T>> pool = std::static_pointer_cast<Pool<T>>(m_componentPools[componentId]);
 
-  if (entityId >= pool->size()) {
-    pool->resize(m_entitiesCount);
-  }
   T newComponent(std::forward<Args>(args)...);
   pool->set(entityId, newComponent);
   m_entityComponentSignatures[entityId].set(componentId);
@@ -119,7 +116,12 @@ template <class T, class... Args> void Registry::addComponent(const Entity entit
 template <class T> void Registry::removeComponent(const Entity entity) {
   const auto componentId = Component::Base<T>::GetId();
   const auto entityId = entity.id();
+
+  std::shared_ptr<Pool<T>> pool = std::static_pointer_cast<Pool<T>>(m_componentPools[componentId]);
+  pool->remove(entityId);
+
   m_entityComponentSignatures[entityId].set(componentId, false);
+
   spdlog::info("Component id = {} was removed from entity id = {}", componentId, entityId);
 }
 

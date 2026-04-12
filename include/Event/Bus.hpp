@@ -1,6 +1,7 @@
 #ifndef BUS_HPP
 #define BUS_HPP
 
+#include <functional>
 #include <list>
 #include <map>
 #include <memory>
