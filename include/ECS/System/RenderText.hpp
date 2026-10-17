@@ -1,6 +1,8 @@
 #ifndef RENDER_TEXT_SYSTEM_HPP
 #define RENDER_TEXT_SYSTEM_HPP
 
+#include "AssetStore/AssetStore.hpp"
+#include "ECS/Component/TextLabel.hpp"
 #include "ECS/System/Base.hpp"
 
 #include <SDL.h>
@@ -29,6 +31,8 @@ struct RenderText : public Base {
           .h = height,
       };
       SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
+
+      SDL_DestroyTexture(texture);
     }
   }
 };

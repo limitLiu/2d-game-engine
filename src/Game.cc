@@ -15,6 +15,7 @@
 #include "ECS/System/CameraMovement.hpp"
 #include "ECS/System/Collision.hpp"
 #include "ECS/System/Damage.hpp"
+#include "ECS/System/HealthBar.hpp"
 #include "ECS/System/KeyboardControl.hpp"
 #include "ECS/System/Movement.hpp"
 #include "ECS/System/ProjectileEmitter.hpp"
@@ -96,6 +97,7 @@ void Game::render() {
   SDL_RenderClear(m_ctx);
   m_registry->system<ECS::System::Render>().update(m_ctx, m_assetStore, m_camera);
   m_registry->system<ECS::System::RenderText>().update(m_ctx, m_assetStore, m_camera);
+  m_registry->system<ECS::System::HealthBar>().update(m_ctx, m_assetStore, m_camera);
 
 #ifndef NDEBUG
   m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
@@ -125,6 +127,7 @@ void Game::loadLevel(i32 level) const {
   m_registry->addSystem<ECS::System::ProjectileEmitter>();
   m_registry->addSystem<ECS::System::ProjectileLifecycle>();
   m_registry->addSystem<ECS::System::RenderText>();
+  m_registry->addSystem<ECS::System::HealthBar>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");
@@ -135,8 +138,9 @@ void Game::loadLevel(i32 level) const {
   m_assetStore->addTexture(m_ctx, "radar", "assets/images/radar.png");
   m_assetStore->addTexture(m_ctx, "bullet", "assets/images/bullet.png");
 
-  m_assetStore->addFont("charriot", "assets/fonts/charriot.ttf", 14);
-  m_assetStore->addFont("arial", "assets/fonts/arial.ttf", 20);
+  m_assetStore->addFont("charriot", "assets/fonts/charriot.ttf", 20);
+  m_assetStore->addFont("pico8-5", "assets/fonts/pico8.ttf", 5);
+  m_assetStore->addFont("pico8-10", "assets/fonts/pico8.ttf", 10);
 
   i32 tileSize = 32;
   constexpr i32 mapNumRows = 20;
@@ -173,6 +177,7 @@ void Game::loadLevel(i32 level) const {
   tank.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity truck = m_registry->createEntity();
+
   truck.setGroup("enemies");
   truck.addComponent<ECS::Component::Transform>(glm::vec2(30.0, 60.0), glm::vec2(1.0, 1.0), 0.0);
   truck.addComponent<ECS::Component::RigidBody>(glm::vec2(0.0, 0.0));
