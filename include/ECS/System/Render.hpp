@@ -37,13 +37,13 @@ struct Render : public Base {
               });
 
     for (const auto [transformComponent, spriteComponent] : renderableEntities) {
-      auto *texture = store->textures(spriteComponent.assetID);
+      auto *const texture = store->texture(spriteComponent.assetID);
       const auto srcRect = spriteComponent.srcRect;
       const SDL_Rect dstRect = {
-          static_cast<i32>(transformComponent.position.x - (spriteComponent.isFixed ? 0 : camera.x)),
-          static_cast<i32>(transformComponent.position.y - (spriteComponent.isFixed ? 0 : camera.y)),
-          static_cast<i32>(spriteComponent.width * transformComponent.scale.x),
-          static_cast<i32>(spriteComponent.height * transformComponent.scale.y)};
+          .x = static_cast<i32>(transformComponent.position.x - (spriteComponent.isFixed ? 0 : camera.x)),
+          .y = static_cast<i32>(transformComponent.position.y - (spriteComponent.isFixed ? 0 : camera.y)),
+          .w = static_cast<i32>(spriteComponent.width * transformComponent.scale.x),
+          .h = static_cast<i32>(spriteComponent.height * transformComponent.scale.y)};
       SDL_RenderCopyEx(context, texture, &srcRect, &dstRect, transformComponent.rotation, nullptr, SDL_FLIP_NONE);
     }
   }

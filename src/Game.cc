@@ -9,6 +9,7 @@
 #include "ECS/Component/ProjectileEmitter.hpp"
 #include "ECS/Component/RigidBody.hpp"
 #include "ECS/Component/Sprite.hpp"
+#include "ECS/Component/TextLabel.hpp"
 #include "ECS/Component/Transform.hpp"
 #include "ECS/System/Animation.hpp"
 #include "ECS/System/CameraMovement.hpp"
@@ -20,6 +21,7 @@
 #include "ECS/System/ProjectileLifecycle.hpp"
 #include "ECS/System/Render.hpp"
 #include "ECS/System/RenderCollider.hpp"
+#include "ECS/System/RenderText.hpp"
 #include "Event/Bus.hpp"
 #include "Event/Keypressed.hpp"
 
@@ -39,7 +41,7 @@ Game::Game() {
   m_registry = std::make_unique<ECS::Registry>();
   m_assetStore = std::make_unique<AssetStore>();
   m_bus = std::make_unique<Event::Bus>();
-  m_camera = {0, 0, s_width, s_height};
+  m_camera = {.x = 0, .y = 0, .w = s_width, .h = s_height};
   spdlog::info("Game constructor called");
 }
 
@@ -48,6 +50,10 @@ Game::~Game() { spdlog::info("Game destructor called"); }
 void Game::initialize() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     spdlog::error("SDL Error: {}", SDL_GetError());
+    return;
+  }
+  if (TTF_Init() != 0) {
+    spdlog::error("SDL TTF Error: {}", TTF_GetError());
     return;
   }
   m_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_width, s_height,
@@ -89,7 +95,12 @@ void Game::render() {
   SDL_SetRenderDrawColor(m_ctx, 0, 0, 0, 0);
   SDL_RenderClear(m_ctx);
   m_registry->system<ECS::System::Render>().update(m_ctx, m_assetStore, m_camera);
+  m_registry->system<ECS::System::RenderText>().update(m_ctx, m_assetStore, m_camera);
+
+#ifndef NDEBUG
   m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
+#endif
+
   SDL_RenderPresent(m_ctx);
 }
 
@@ -113,6 +124,7 @@ void Game::loadLevel(i32 level) const {
   m_registry->addSystem<ECS::System::CameraMovement>();
   m_registry->addSystem<ECS::System::ProjectileEmitter>();
   m_registry->addSystem<ECS::System::ProjectileLifecycle>();
+  m_registry->addSystem<ECS::System::RenderText>();
 
   m_assetStore->addTexture(m_ctx, "tank-panther-right", "assets/images/tank-panther-right.png");
   m_assetStore->addTexture(m_ctx, "truck-ford-up", "assets/images/truck-ford-up.png");
@@ -122,6 +134,9 @@ void Game::loadLevel(i32 level) const {
 
   m_assetStore->addTexture(m_ctx, "radar", "assets/images/radar.png");
   m_assetStore->addTexture(m_ctx, "bullet", "assets/images/bullet.png");
+
+  m_assetStore->addFont("charriot", "assets/fonts/charriot.ttf", 14);
+  m_assetStore->addFont("arial", "assets/fonts/arial.ttf", 20);
 
   i32 tileSize = 32;
   constexpr i32 mapNumRows = 20;
@@ -184,6 +199,10 @@ void Game::loadLevel(i32 level) const {
   radar.addComponent<ECS::Component::RigidBody>(glm::vec2(00.0, 0.0));
   radar.addComponent<ECS::Component::Sprite>("radar", 64, 64, 2, true);
   radar.addComponent<ECS::Component::Animation>(8, 5, true);
+
+  ECS::Entity label = m_registry->createEntity();
+  label.addComponent<ECS::Component::TextLabel>(glm::vec2(s_width / 2, 10), "Show Text", "charriot",
+                                                SDL_Color{.r = 255, .g = 255, .b = 255}, true);
 }
 
 void Game::setup() const { loadLevel(1); }
