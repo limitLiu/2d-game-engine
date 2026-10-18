@@ -22,6 +22,7 @@
 #include "ECS/System/ProjectileLifecycle.hpp"
 #include "ECS/System/Render.hpp"
 #include "ECS/System/RenderCollider.hpp"
+#include "ECS/System/RenderGUI.hpp"
 #include "ECS/System/RenderText.hpp"
 #include "Event/Bus.hpp"
 #include "Event/Keypressed.hpp"
@@ -145,18 +146,7 @@ void Game::render() {
 
 #ifndef NDEBUG
   m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
-  SDL_RenderSetViewport(m_ctx, nullptr);
-  ImGui_ImplSDLRenderer2_NewFrame();
-  ImGui_ImplSDL2_NewFrame();
-  ImGui::NewFrame();
-
-  ImGui::ShowDemoWindow();
-  ImGui::Render();
-
-  const auto &io = ImGui::GetIO();
-  SDL_RenderSetScale(m_ctx, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-  ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_ctx);
-  SDL_RenderSetScale(m_ctx, 1.0, 1.0);
+  m_registry->system<ECS::System::RenderGUI>().update(m_ctx);
 #endif
 
   SDL_RenderPresent(m_ctx);
@@ -177,6 +167,7 @@ void Game::loadLevel(i32 level) const {
   m_registry->addSystem<ECS::System::Animation>();
   m_registry->addSystem<ECS::System::Collision>();
   m_registry->addSystem<ECS::System::RenderCollider>();
+  m_registry->addSystem<ECS::System::RenderGUI>();
   m_registry->addSystem<ECS::System::Damage>();
   m_registry->addSystem<ECS::System::KeyboardControl>();
   m_registry->addSystem<ECS::System::CameraMovement>();
