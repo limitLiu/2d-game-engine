@@ -146,7 +146,7 @@ void Game::render() {
 
 #ifndef NDEBUG
   m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
-  m_registry->system<ECS::System::RenderGUI>().update(m_ctx);
+  m_registry->system<ECS::System::RenderGUI>().update(m_ctx, m_registry);
 #endif
 
   SDL_RenderPresent(m_ctx);
@@ -213,15 +213,6 @@ void Game::loadLevel(i32 level) const {
   mapFile.close();
   s_mapWidth = mapNumCols * tileSize * tileScale;
   s_mapHeight = mapNumRows * tileSize * tileScale;
-
-  ECS::Entity tank = m_registry->createEntity();
-  tank.setGroup("enemies");
-  tank.addComponent<ECS::Component::Transform>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-  tank.addComponent<ECS::Component::RigidBody>(glm::vec2(10.0, 0.0));
-  tank.addComponent<ECS::Component::Sprite>("tank-panther-right", 32, 32, 1);
-  tank.addComponent<ECS::Component::BoxCollider>(32, 32);
-  tank.addComponent<ECS::Component::ProjectileEmitter>(glm::vec2(100.0, 0), 5000, 3000, 10, false);
-  tank.addComponent<ECS::Component::Health>(100);
 
   ECS::Entity truck = m_registry->createEntity();
 

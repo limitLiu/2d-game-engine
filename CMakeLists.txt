@@ -96,6 +96,7 @@ add_executable(${PROJECT_NAME}
     src/ECS/Registry.cc
     src/Event/Bus.cc
     src/AssetStore/AssetStore.cc
+    src/ECS/System/RenderGUI.cc
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
