@@ -58,7 +58,7 @@ FetchContent_Declare(
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG docking
+    GIT_TAG v1.93.0
 )
 
 FetchContent_MakeAvailable(spdlog glm sol2 imgui)
@@ -72,7 +72,7 @@ if (imgui_POPULATED)
       ${imgui_SOURCE_DIR}/imgui_widgets.cpp
 
       ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp
-      ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+      ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer2.cpp
   )
 
   add_library(imgui_lib STATIC ${IMGUI_SOURCES})
@@ -84,13 +84,7 @@ if (imgui_POPULATED)
       ${imgui_SOURCE_DIR}/backends
   )
 
-  if (APPLE)
-    target_link_libraries(imgui_lib PUBLIC "-framework OpenGL")
-  else ()
-    target_link_libraries(imgui_lib PUBLIC GL)
-  endif ()
-
-  message(STATUS "ImGui setup complete with SDL2 and OpenGL3 backend.")
+  message(STATUS "ImGui setup complete with SDL2 and SDL_Renderer backend.")
 endif ()
 
 add_executable(${PROJECT_NAME}

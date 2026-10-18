@@ -26,9 +26,13 @@
 #include "Event/Bus.hpp"
 #include "Event/Keypressed.hpp"
 
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_sdlrenderer2.h>
 #include <spdlog/spdlog.h>
 
 using namespace Engine;
@@ -57,8 +61,9 @@ void Game::initialize() {
     spdlog::error("SDL TTF Error: {}", TTF_GetError());
     return;
   }
+
   m_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_width, s_height,
-                              SDL_WINDOW_BORDERLESS);
+                              SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALLOW_HIGHDPI);
   if (m_window == nullptr) {
     spdlog::error("Failed to create SDL Window.");
     return;
@@ -68,14 +73,34 @@ void Game::initialize() {
     spdlog::error("Failed to create SDL Window Renderer.");
     return;
   }
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGui::StyleColorsDark();
+
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+  if (!ImGui_ImplSDL2_InitForSDLRenderer(m_window, m_ctx)) {
+    spdlog::error("Failed to initialize ImGui SDL2 backend");
+    ImGui::DestroyContext();
+    return;
+  }
+  if (!ImGui_ImplSDLRenderer2_Init(m_ctx)) {
+    spdlog::error("Failed to initialize ImGui SDL renderer backend");
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+    return;
+  }
+
   SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
-  SDL_RenderSetLogicalSize(m_ctx, s_width, s_height);
+
   m_isRunning = true;
 }
 
 void Game::inputEvent() {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
+    ImGui_ImplSDL2_ProcessEvent(&event);
     switch (event.type) {
     case SDL_QUIT:
       m_isRunning = false;
@@ -84,7 +109,9 @@ void Game::inputEvent() {
       if (event.key.keysym.sym == SDLK_ESCAPE) {
         m_isRunning = false;
       }
-      m_bus->emit<Event::KeyPressed>(event.key.keysym.sym);
+      if (!ImGui::GetIO().WantCaptureKeyboard) {
+        m_bus->emit<Event::KeyPressed>(event.key.keysym.sym);
+      }
       break;
     default:
       break;
@@ -95,12 +122,41 @@ void Game::inputEvent() {
 void Game::render() {
   SDL_SetRenderDrawColor(m_ctx, 0, 0, 0, 0);
   SDL_RenderClear(m_ctx);
+
+  i32 outputW = 0;
+  i32 outputH = 0;
+  SDL_GetRendererOutputSize(m_ctx, &outputW, &outputH);
+  const f32 gameScale = std::min(static_cast<f32>(outputW) / static_cast<f32>(s_width),
+                                 static_cast<f32>(outputH) / static_cast<f32>(s_height));
+  if (outputW > 0 && outputH > 0) {
+    const SDL_Rect gameViewport{
+        .x = static_cast<i32>((static_cast<f32>(outputW) / gameScale - static_cast<f32>(s_width)) / 2.0),
+        .y = static_cast<i32>((static_cast<f32>(outputH) / gameScale - static_cast<f32>(s_height)) / 2.0),
+        .w = s_width,
+        .h = s_height,
+    };
+    SDL_RenderSetScale(m_ctx, gameScale, gameScale);
+    SDL_RenderSetViewport(m_ctx, &gameViewport);
+  }
+
   m_registry->system<ECS::System::Render>().update(m_ctx, m_assetStore, m_camera);
   m_registry->system<ECS::System::RenderText>().update(m_ctx, m_assetStore, m_camera);
   m_registry->system<ECS::System::HealthBar>().update(m_ctx, m_assetStore, m_camera);
 
 #ifndef NDEBUG
   m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
+  SDL_RenderSetViewport(m_ctx, nullptr);
+  ImGui_ImplSDLRenderer2_NewFrame();
+  ImGui_ImplSDL2_NewFrame();
+  ImGui::NewFrame();
+
+  ImGui::ShowDemoWindow();
+  ImGui::Render();
+
+  const auto &io = ImGui::GetIO();
+  SDL_RenderSetScale(m_ctx, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+  ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_ctx);
+  SDL_RenderSetScale(m_ctx, 1.0, 1.0);
 #endif
 
   SDL_RenderPresent(m_ctx);
@@ -234,7 +290,14 @@ void Game::update() {
 }
 
 void Game::destroy() const {
+  if (ImGui::GetCurrentContext()) {
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+  }
+  m_assetStore->clearTextures();
   SDL_DestroyRenderer(m_ctx);
   SDL_DestroyWindow(m_window);
+  TTF_Quit();
   SDL_Quit();
 }
