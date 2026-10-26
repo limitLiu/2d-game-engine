@@ -6,3 +6,4 @@
 /.cache
 /cmake-build-debug
 /.idea
+*.ini
