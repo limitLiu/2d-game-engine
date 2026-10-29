@@ -110,6 +110,9 @@ void Game::inputEvent() {
       if (event.key.keysym.sym == SDLK_ESCAPE) {
         m_isRunning = false;
       }
+      if (event.key.keysym.sym == SDLK_F1) {
+        m_isDebug = !m_isDebug;
+      }
       if (!ImGui::GetIO().WantCaptureKeyboard) {
         m_bus->emit<Event::KeyPressed>(event.key.keysym.sym);
       }
@@ -144,10 +147,10 @@ void Game::render() {
   m_registry->system<ECS::System::RenderText>().update(m_ctx, m_assetStore, m_camera);
   m_registry->system<ECS::System::HealthBar>().update(m_ctx, m_assetStore, m_camera);
 
-#ifndef NDEBUG
-  m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
-  m_registry->system<ECS::System::RenderGUI>().update(m_ctx, m_registry);
-#endif
+  if (m_isDebug) {
+    m_registry->system<ECS::System::RenderCollider>().update(m_ctx, m_camera);
+    m_registry->system<ECS::System::RenderGUI>().update(m_ctx, m_registry, m_camera);
+  }
 
   SDL_RenderPresent(m_ctx);
 }

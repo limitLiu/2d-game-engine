@@ -11,7 +11,7 @@ namespace System {
 struct RenderGUI : public Base {
   RenderGUI() = default;
 
-  auto update(SDL_Renderer *renderer, const std::unique_ptr<Registry> &registry) const -> void;
+  auto update(SDL_Renderer *renderer, const std::unique_ptr<Registry> &registry, const SDL_Rect &camera) const -> void;
 };
 } // namespace System
 } // namespace Engine::ECS

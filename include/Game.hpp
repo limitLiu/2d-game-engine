@@ -51,6 +51,7 @@ private:
   SDL_Window *m_window{nullptr};
   SDL_Renderer *m_ctx{nullptr};
   bool m_isRunning{false};
+  bool m_isDebug{false};
   i32 m_millionSecsPreviousFrame{0};
   std::unique_ptr<ECS::Registry> m_registry;
   std::unique_ptr<struct AssetStore> m_assetStore;
